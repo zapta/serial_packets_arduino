@@ -7,14 +7,55 @@
 #include <Arduino.h>
 
 enum SeriaPacketsEvent {
-
+  CONNECTED = 1,
+  DISCONNECTED = 2,
 };
 
-class SerialPacketsData {};
+class SerialPacketsData {
+ public:
+  SerialPacketsData(uint16_t max_data_size) { alloc_buffer(max_data_size); }
+  ~SerialPacketsData() { free_buffer(); }
 
-// class SerialPacketsCommandResponse {};
+  // Disable copying and assignment.
+  SerialPacketsData(const SerialPacketsData& other) = delete;
+  SerialPacketsData& operator=(const SerialPacketsData& other) = delete;
 
-class SerialPacketsPendingCommand {
+  uint16_t max_data_size() { return _buffer_size; }
+  uint16_t data_size() { return _data_size; }
+
+  void dump_data(Stream& s);
+
+  void clear_data() {
+    _data_size = 0;
+    _next_read_index = 0;
+  }
+
+  // Data writing
+  bool add_byte(byte v);
+  bool add_uint16(uint16_t v);
+  bool add_uint32(uint32_t v);
+  bool add_bytes_block(byte bytes[], uint32_t num_bytes);
+
+  // Data reading
+  uint16_t bytes_read() { return _next_read_index; }
+  void reset_read_location() { _next_read_index = 0; }
+  bool read_byte(byte& v);
+  bool read_uint16(uint16_t& v);
+  bool read_uint32(uint32_t& v);
+  bool read_bytes_block(byte bytes_buffer[], uint32_t byte_buffer_size,
+                        uint32_t& bytes_read);
+
+ private:
+  uint16_t _buffer_size = 0;
+  uint16_t _data_size = 0;
+  uint16_t _next_read_index = 0;
+  byte* _buffer = nullptr;
+
+  void free_buffer();
+  bool alloc_buffer(uint16_t buffer_size);
+};
+
+class SerialPacketsPendingCommandResponse {
   // Ready
   //
   bool isReady() { return false; }
@@ -27,13 +68,12 @@ class SerialPacketsPendingCommand {
   SerialPacketsData _response_data;
 };
 
-typedef void (*SerialPacketsCommandHandler)(byte endpoint,
-                                            const SerialPacketsData& data,
-                                            byte& response_status,
-                                            SerialPacketsData& response_data);
+typedef void (*SerialPacketsCommandHandler)(
+    byte command_endpoint, const SerialPacketsData& command_data,
+    byte& response_status, SerialPacketsData& response_data);
 
-typedef void (*SerialPacketsMessageHandler)(byte endpoint,
-                                            const SerialPacketsData& data);
+typedef void (*SerialPacketsMessageHandler)(
+    byte message_endpoint, const SerialPacketsData& message_data);
 
 typedef void (*SerialPacketsEventHandler)(SeriaPacketsEvent event);
 
@@ -50,10 +90,11 @@ class SerialPacketsClient {
 
   void loop();
 
-  bool sendCommand(byte endpoint, const SerialPacketsData& data,
-                   const SerialPacketsPendingCommand& pending_command);
+  bool sendCommand(byte command_endpoint, const SerialPacketsData& command_data,
+                   const SerialPacketsPendingCommandResponse& pending_response);
 
-  bool sendMessage(byte endpoint, const SerialPacketsData& data);
+  bool sendMessage(byte message_endpoint,
+                   const SerialPacketsData& message_data);
 
  private:
   // Callback handlers. Set by the constructor.

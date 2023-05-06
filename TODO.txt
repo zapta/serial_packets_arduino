@@ -1,0 +1,6 @@
+
+In data class, update next_read_data to be within data.
+
+Apply arduino code style
+
+Use arduino code doc format?
