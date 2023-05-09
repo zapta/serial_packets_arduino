@@ -1,17 +1,19 @@
 #include <Arduino.h>
 #include <serial_packets.h>
 
+#include "elapsed.h"
 
 String str;
 
 // Handler for incomming commands
-void commandHandler(byte endpoint, const SerialPacketsData& data,
-                    byte& response_status, SerialPacketsData& response_data) {
+void incomingCommandHandler(byte endpoint, const SerialPacketsData& data,
+                            byte& response_status,
+                            SerialPacketsData& response_data) {
   Serial.println("Command Handler");
 }
 
 // Handler for incomming messages
-void messageHandler(byte endpoint, const SerialPacketsData& data) {
+void incomingMessageHandler(byte endpoint, const SerialPacketsData& data) {
   Serial.println("Message Handler");
 }
 
@@ -19,18 +21,42 @@ void messageHandler(byte endpoint, const SerialPacketsData& data) {
 void eventHandler(SeriaPacketsEvent event) { Serial.println("Event Handler"); }
 
 // Serial Packets client. We associate it with a serial port in setup().
-SerialPacketsClient SerialPackets(commandHandler, messageHandler, eventHandler);
-
-
-SerialPacketsData data(100);
+SerialPacketsClient packets(incomingCommandHandler, incomingMessageHandler,
+                            eventHandler);
 
 void setup() {
-  // We use serial2 for data communication and serial1 for debug messages.
+  // Debug stream.
+  Serial.begin(115200);
+  // Start the datalink
   Serial2.begin(115200);
-  Serial1.begin(115200);
-  SerialPackets.begin(Serial2, Serial1);
+  packets.begin(Serial2, Serial);
+}
+
+Elapsed command_timer;
+SerialPacketsData data(40);
+uint32_t cmd_id;
+
+void command_response_handler(uint32_t user_data, OutcomeCode outcome,
+                              byte response_status,
+                              const SerialPacketsData& response_data) {
+  Serial.println("Command outcome");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Service serial packets loop.
+  packets.loop();
+
+  // Periodically send a command.
+  if (command_timer.elapsed_millis() > 1000) {
+    command_timer.reset();
+
+    // Send command
+    data.clear();
+    data.add_uint8(0x10);
+    data.add_uint32(0x12345678);
+    // data.dump("Command data", Serial);
+    if (!packets.sendCommand(0x20, data, command_response_handler, cmd_id, 500)) {
+      Serial.println("sendCommand() failed");
+    }
+  }
 }
