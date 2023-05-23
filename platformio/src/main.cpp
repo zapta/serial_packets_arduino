@@ -6,14 +6,14 @@
 String str;
 
 // Handler for incomming commands
-void incomingCommandHandler(byte endpoint, const SerialPacketsData& data,
+void incomingCommandHandler(byte endpoint, const SerialPacketData& data,
                             byte& response_status,
-                            SerialPacketsData& response_data) {
+                            SerialPacketData& response_data) {
   Serial.println("Command Handler");
 }
 
 // Handler for incomming messages
-void incomingMessageHandler(byte endpoint, const SerialPacketsData& data) {
+void incomingMessageHandler(byte endpoint, const SerialPacketData& data) {
   Serial.println("Message Handler");
 }
 
@@ -33,12 +33,12 @@ void setup() {
 }
 
 Elapsed command_timer;
-SerialPacketsData data(40);
+SerialPacketData data(40);
 uint32_t cmd_id;
 
 void command_response_handler(uint32_t user_data, OutcomeCode outcome,
                               byte response_status,
-                              const SerialPacketsData& response_data) {
+                              const SerialPacketData& response_data) {
   Serial.println("Command outcome");
 }
 

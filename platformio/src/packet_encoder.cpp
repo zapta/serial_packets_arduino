@@ -3,8 +3,8 @@
 #include "packet_consts.h"
 #include "serial_packets.h"
 
-bool PacketEncoder::byte_stuffing(const SerialPacketsData& in,
-                                  SerialPacketsData& out,
+bool PacketEncoder::byte_stuffing(const SerialPacketData& in,
+                                  SerialPacketData& out,
                                   bool insert_pre_flag) {
   out.clear();
   const uint16_t capacity = out.capacity();
@@ -19,7 +19,7 @@ bool PacketEncoder::byte_stuffing(const SerialPacketsData& in,
   }
 
   // Byte stuff the in bytes.
-  for (uint16_t i = 0; i < in._data_size; i++) {
+  for (uint16_t i = 0; i < in._size; i++) {
     const uint8_t b = in._buffer[i];
     if (b == PACKET_FLAG || b == PACKET_ESC) {
       if (j + 2 >= capacity) {
@@ -42,13 +42,13 @@ bool PacketEncoder::byte_stuffing(const SerialPacketsData& in,
   out._buffer[j++] = PACKET_FLAG;
 
   // Update outptut data size.
-  out._data_size = j;
+  out._size = j;
   return true;
 }
 
 bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
-                                          const SerialPacketsData& data,
-                                          SerialPacketsData& out,
+                                          const SerialPacketData& data,
+                                          SerialPacketData& out,
                                           bool insert_pre_flag) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();

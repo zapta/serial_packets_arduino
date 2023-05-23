@@ -2,17 +2,17 @@
 
 #include <Arduino.h>
 
-#include "serial_packets.h"
+#include "packet_data.h"
 
 class PacketEncoder {
  public:
   bool encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
-                             const SerialPacketsData& data,
-                             SerialPacketsData& out, bool insert_pre_flag);
+                             const SerialPacketData& data,
+                             SerialPacketData& out, bool insert_pre_flag);
  private:
  
-   SerialPacketsData _tmp_data;
+   SerialPacketData _tmp_data;
 
-  bool byte_stuffing(const SerialPacketsData& in, SerialPacketsData& out,
+  bool byte_stuffing(const SerialPacketData& in, SerialPacketData& out,
                      bool insert_pre_flag);
 };
