@@ -5,11 +5,11 @@
 
 #include <Arduino.h>
 
-#include "elapsed.h"
+#include "packet_timer.h"
 #include "packet_data.h"
 #include "packet_decoder.h"
 #include "packet_encoder.h"
-#include "logger.h"
+#include "packet_logger.h"
 
 // #include "serial_buffer.h"
 
@@ -67,9 +67,13 @@ class SerialPacketsClient {
       SerialPacketsIncomingCommandHandler command_handler = nullptr,
       SerialPacketsIncomingMessageHandler message_handler = nullptr,
       SerialPacketsEventHandler event_handler = nullptr)
-      : _command_handler(command_handler),
+      : 
+       _command_handler(command_handler),
         _message_handler(message_handler),
-        _event_handler(event_handler) {}
+        _event_handler(event_handler),
+        _packet_encoder(_logger),
+        _packet_decoder(_logger)
+         {}
 
   void begin(Stream& data_stream,  Stream& log_stream);
   void begin(Stream& data_stream);
@@ -102,13 +106,15 @@ class SerialPacketsClient {
 
   // static  Logger null_logger;
 
+    PacketLogger _logger;
+
   // Callback handlers. Set by the constructor.
   SerialPacketsIncomingCommandHandler const _command_handler;
   SerialPacketsIncomingMessageHandler const _message_handler;
   SerialPacketsEventHandler const _event_handler;
 
   Stream* _data_stream = nullptr;
-  Logger _logger;
+
 
   SerialPacketData _tmp_data1;
   SerialPacketData _tmp_data2;
@@ -119,7 +125,7 @@ class SerialPacketsClient {
   // Used to assign command ids. Wraparound is ok. Skipping zero value.
   uint32_t _cmd_id_counter = 0;
   // Used to insert pre flag when packates are sparse.
-  Elapsed _pre_flag_timer;
+  PacketTimer _pre_flag_timer;
 
   // The max number of in-progress outcoing commands.
   static constexpr uint16_t MAX_CMD_CONTEXTS = 20;

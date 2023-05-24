@@ -1,5 +1,5 @@
 #include "serial_packets.h"
-#include "crc.h"
+#include "packet_crc.h"
 
 void SerialPacketData::dump_data(Stream& s) {
   s.println("SerialPacketsData dump TBD");

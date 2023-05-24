@@ -1,5 +1,9 @@
 
 
+* Control buffer sizes by macros users can override.
+
+* More scaleabole command context structure.
+
 ----------------
 
 Apply arduino code style

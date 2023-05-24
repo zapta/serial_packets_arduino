@@ -1,4 +1,4 @@
-#include "crc.h"
+#include "packet_crc.h"
 
 #include <Arduino.h>
 
@@ -53,11 +53,11 @@ uint16_t gen_crc16(const uint8_t*  data, const uint16_t size) {
     if (i & out) crc |= j;
   }
 
-  Serial.printf("\nCRC: ");
-  for (int i = 0; i < size; i++) {
-    Serial.printf(" %02hx", data[i]);
-  }
-  Serial.printf(" -> %04hx\n\n", crc);
+  // Serial.printf("\nCRC: ");
+  // for (int i = 0; i < size; i++) {
+  //   Serial.printf(" %02hx", data[i]);
+  // }
+  // Serial.printf(" -> %04hx\n\n", crc);
 
   return crc;
 }

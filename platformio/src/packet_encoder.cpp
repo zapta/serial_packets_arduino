@@ -3,18 +3,20 @@
 #include "packet_consts.h"
 #include "serial_packets.h"
 
-bool PacketEncoder::byte_stuffing(const SerialPacketData& in,
-                                  SerialPacketData& out, bool insert_pre_flag) {
-  out.clear();
-  const uint16_t capacity = out.capacity();
+bool PacketEncoder::byte_stuffing(const SerialPacketData& in , bool insert_pre_flag,
+                                  SerialPacketData* out) {
+  out->clear();
+  const uint16_t capacity = out->capacity();
   uint16_t j = 0;
 
   // If requested, prepend a flag byte.
   if (insert_pre_flag) {
     if (j + 1 >= capacity) {
+      _logger.error(
+          "Insufficient space when trying to byte stuff a packet (#1).");
       return false;
     }
-    out._buffer[j++] = PACKET_FLAG;
+    out->_buffer[j++] = PACKET_FLAG;
   }
 
   // Byte stuff the in bytes.
@@ -22,33 +24,40 @@ bool PacketEncoder::byte_stuffing(const SerialPacketData& in,
     const uint8_t b = in._buffer[i];
     if (b == PACKET_FLAG || b == PACKET_ESC) {
       if (j + 2 >= capacity) {
+        _logger.error(
+            "Insufficient space when trying to byte stuff a packet "
+            "(#2).");
         return false;
       }
-      out._buffer[j++] = PACKET_ESC;
-      out._buffer[j++] = b ^ 0x20;
+      out->_buffer[j++] = PACKET_ESC;
+      out->_buffer[j++] = b ^ 0x20;
     } else {
       if (j + 1 >= capacity) {
+        _logger.error(
+            "Insufficient space when trying to byte stuff a packet (#3).");
         return false;
       }
-      out._buffer[j++] = b;
+      out->_buffer[j++] = b;
     }
   }
 
   // Append post flag.
   if (j + 1 >= capacity) {
+    _logger.error(
+        "Insufficient space when trying to byte stuff a packet (#4).");
     return false;
   }
-  out._buffer[j++] = PACKET_FLAG;
+  out->_buffer[j++] = PACKET_FLAG;
 
   // Update outptut data size.
-  out._size = j;
+  out->_size = j;
   return true;
 }
 
 bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
                                           const SerialPacketData& data,
-                                          SerialPacketData& out,
-                                          bool insert_pre_flag) {
+                                          bool insert_pre_flag,
+                                          SerialPacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_COMMAND);
@@ -57,17 +66,19 @@ bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
   _tmp_data.add_data(data);
   _tmp_data.add_uint16(_tmp_data.crc16());
   if (_tmp_data.write_error()) {
+    _logger.error("Error encoding a command packet. Data size: %hu",
+                 data.size());
     return false;
   }
 
   // Byte stuffed into the outupt data.
-  return byte_stuffing(_tmp_data, out, insert_pre_flag);
+  return byte_stuffing(_tmp_data,  insert_pre_flag, out);
 }
 
 bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
                                            const SerialPacketData& data,
-                                           SerialPacketData& out,
-                                           bool insert_pre_flag) {
+                                           bool insert_pre_flag,
+                                           SerialPacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_RESPONSE);
@@ -76,17 +87,19 @@ bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
   _tmp_data.add_data(data);
   _tmp_data.add_uint16(_tmp_data.crc16());
   if (_tmp_data.write_error()) {
+    _logger.error("Error encoding a response packet. Data size: %hu",
+                 data.size());
     return false;
   }
 
   // Byte stuffed into the outupt data.
-  return byte_stuffing(_tmp_data, out, insert_pre_flag);
+  return byte_stuffing(_tmp_data,  insert_pre_flag, out);
 }
 
 bool PacketEncoder::encode_message_packet(uint8_t endpoint,
                                           const SerialPacketData& data,
-                                          SerialPacketData& out,
-                                          bool insert_pre_flag) {
+                                          bool insert_pre_flag,
+                                          SerialPacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_MESSAGE);
@@ -94,9 +107,11 @@ bool PacketEncoder::encode_message_packet(uint8_t endpoint,
   _tmp_data.add_data(data);
   _tmp_data.add_uint16(_tmp_data.crc16());
   if (_tmp_data.write_error()) {
+    _logger.error("Error encoding a response packet. Data size: %hu",
+                 data.size());
     return false;
   }
 
   // Byte stuffed into the outupt data.
-  return byte_stuffing(_tmp_data, out, insert_pre_flag);
+  return byte_stuffing(_tmp_data,  insert_pre_flag, out);
 }

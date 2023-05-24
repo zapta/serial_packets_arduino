@@ -2,9 +2,9 @@
 
 #include <Arduino.h>
 
-class Elapsed {
+class PacketTimer {
  public:
-  Elapsed() { reset(); }
+  PacketTimer() { reset(); }
 
   void reset() { start_millis_ = millis(); }
 

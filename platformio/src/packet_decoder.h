@@ -4,6 +4,7 @@
 
 #include "packet_consts.h"
 #include "packet_data.h"
+#include "packet_logger.h"
 
 // enum DecodedPacketType {
 //   COMMAND,
@@ -36,28 +37,29 @@ struct DecodedPacketMetadata {
 
 class PacketDecoder {
  public:
-  enum DecoderStatus {
-    // In normal operation.
-    PACKET_START = 1,
-    IN_PACKET,
-    PACKET_DECODED,
+  // enum DecoderStatus {
+  //   // In normal operation.
+  //   PACKET_START = 1,
+  //   IN_PACKET,
+  //   PACKET_DECODED,
 
-    // Errors.
-    OVERRUN,
-    CONSECUTIVE_ESCAPES,
-    INVALID_ESCAPE,
-    PACKET_TOO_SHORT,
-    BAD_CRC,
-    COMMAND_PACKET_TOO_SHORT,
-    RESPONSE_PACKET_TOO_SHORT,
-    MESSAGE_PACKET_TOO_SHORT,
-    INVALID_PACKET_TYPE,
-  };
+  //   // Errors.
+  //   OVERRUN,
+  //   CONSECUTIVE_ESCAPES,
+  //   INVALID_ESCAPE,
+  //   PACKET_TOO_SHORT,
+  //   BAD_CRC,
+  //   COMMAND_PACKET_TOO_SHORT,
+  //   RESPONSE_PACKET_TOO_SHORT,
+  //   MESSAGE_PACKET_TOO_SHORT,
+  //   INVALID_PACKET_TYPE,
+  // };
 
-  PacketDecoder() : _decoded_data(MAX_DATA_LEN) {}
+  PacketDecoder(PacketLogger& logger) : _logger(logger),
+   _decoded_data(MAX_DATA_LEN) {}
 
   // True if a packet is available.
-  DecoderStatus decode_next_byte(uint8_t);
+  bool decode_next_byte(uint8_t);
 
   const DecodedPacketMetadata& packet_metadata() { return _decoded_metadata; }
 
@@ -67,8 +69,14 @@ class PacketDecoder {
   uint16_t len() { return _packet_len; }
 
  private:
+
+  // None null.
+  PacketLogger&  _logger;
+
   uint8_t _packet_buffer[MAX_PACKET_LEN];
   uint16_t _packet_len;
+
+
 
   //  enum State {
   //   IDLE,
@@ -86,7 +94,8 @@ class PacketDecoder {
   DecodedPacketMetadata _decoded_metadata;
   SerialPacketData _decoded_data;
 
-  DecoderStatus process_packet();
+// Returns true iff a new packet is available.
+  bool process_packet();
 
   inline uint16_t decode_uint16_at_index(uint16_t i) {
     return (((uint16_t)_packet_buffer[i]) << 8) |

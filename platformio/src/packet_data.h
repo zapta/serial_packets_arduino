@@ -23,12 +23,12 @@ class SerialPacketData {
   SerialPacketData(const SerialPacketData& other) = delete;
   SerialPacketData& operator=(const SerialPacketData& other) = delete;
 
-  uint16_t capacity() { return _capacity; }
-  uint16_t size() { return _size; }
-  uint16_t bytes_to_read() { return _size - _bytes_read; }
-  bool all_read() { return _bytes_read >= _size; }
-  bool read_error() { return _read_error; }
-  bool write_error() { return _read_error; }
+  uint16_t capacity() const { return _capacity; }
+  uint16_t size() const { return _size; }
+  uint16_t bytes_to_read() const { return _size - _bytes_read; }
+  bool all_read() const  { return _bytes_read >= _size; }
+  bool read_error() const { return _read_error; }
+  bool write_error() const  { return _read_error; }
 
   bool all_read_ok() { return _bytes_read >= _size && !_read_error; }
 

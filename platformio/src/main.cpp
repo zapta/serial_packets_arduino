@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <serial_packets.h>
 
-#include "elapsed.h"
+#include "packet_timer.h"
 
 String str;
 
@@ -36,7 +36,7 @@ void setup() {
   packets.begin(Serial2, Serial);
 }
 
-static Elapsed test_command_timer;
+static PacketTimer test_command_timer;
 static SerialPacketData test_packet_data(40);
 static uint32_t test_cmd_id = 0;
 
