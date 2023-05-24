@@ -2,7 +2,7 @@
 
 * Control buffer sizes by macros users can override.
 
-* More scaleabole command context structure.
+* More scalable command context structure.
 
 ----------------
 
