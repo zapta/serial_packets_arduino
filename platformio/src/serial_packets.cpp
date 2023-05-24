@@ -1,6 +1,7 @@
 #include "serial_packets.h"
 
 #include "packet_consts.h"
+#include "io.h"
 
 // TODO: All methods should verify that data stream is available (and that
 // client is in active state)
@@ -188,7 +189,11 @@ bool SerialPacketsClient::sendCommand(
 
   // Find a free command context. At this point we still leave it
   // with cmd_id = 0. in case of an early return due to an error.
+    io::TEST2.set();
+
   CommandContext* cmd_context = find_context_with_cmd_id(0);
+    io::TEST2.clr();
+
   if (!cmd_context) {
     _logger.error("Can't send a command, too many commands in progress (%d)",
                 MAX_CMD_CONTEXTS);
@@ -200,12 +205,16 @@ bool SerialPacketsClient::sendCommand(
   // Determine if to insert a packet flag.
   const bool insert_pre_flag = check_pre_flag();
 
+  io::TEST2.set();
+
   // Encode the packet in wire format.
   if (!_packet_encoder.encode_command_packet(new_cmd_id, endpoint, data,
                                              insert_pre_flag, &_tmp_data1)) {
     _logger.error("Failed to encode command packet");
     return false;
   }
+    io::TEST2.clr();
+
 
   // Push to TX buffer. It's all or nothing, no partial push.
   const uint16_t size = _tmp_data1.size();
@@ -222,7 +231,9 @@ bool SerialPacketsClient::sendCommand(
   // NOTE: We assume that this will not be blocking since we verified
   // the number of avilable bytes in the buffer. We force large buffer
   // using a build flag such as -DSERIAL_TX_BUFFER_SIZE=4096.
+  io::TEST2.set();
   const uint16_t written = _data_stream->write(_tmp_data1._buffer, size);
+  io::TEST2.clr();
   _logger.verbose("Written %hu of %hu command packet bytes", written, size);
 
   if (written < size) {

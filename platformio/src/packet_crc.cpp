@@ -1,6 +1,7 @@
 #include "packet_crc.h"
 
 #include <Arduino.h>
+#include "io.h"
 
 // From
 // https://stackoverflow.com/questions/10564491/function-to-calculate-a-crc16-checksum
@@ -8,6 +9,8 @@
 #define CRC16 0x8005
 
 uint16_t gen_crc16(const uint8_t*  data, const uint16_t size) {
+      io::TEST1.set();
+
   uint16_t n = size;
   const uint8_t* p_data = data;
 
@@ -58,6 +61,8 @@ uint16_t gen_crc16(const uint8_t*  data, const uint16_t size) {
   //   Serial.printf(" %02hx", data[i]);
   // }
   // Serial.printf(" -> %04hx\n\n", crc);
+
+    io::TEST1.clr();
 
   return crc;
 }
