@@ -4,13 +4,12 @@
 #include "serial_packets.h"
 
 bool PacketEncoder::byte_stuffing(const SerialPacketData& in,
-                                  SerialPacketData& out,
-                                  bool insert_pre_flag) {
+                                  SerialPacketData& out, bool insert_pre_flag) {
   out.clear();
   const uint16_t capacity = out.capacity();
   uint16_t j = 0;
 
-   // If requested, prepend a flag byte.
+  // If requested, prepend a flag byte.
   if (insert_pre_flag) {
     if (j + 1 >= capacity) {
       return false;
@@ -54,6 +53,7 @@ bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_COMMAND);
   _tmp_data.add_uint32(cmd_id);
+  _tmp_data.add_uint8(endpoint);
   _tmp_data.add_data(data);
   _tmp_data.add_uint16(_tmp_data.crc16());
   if (_tmp_data.write_error()) {
@@ -61,11 +61,42 @@ bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
   }
 
   // Byte stuffed into the outupt data.
-  if (!byte_stuffing(_tmp_data, out,  insert_pre_flag)) {
+  return byte_stuffing(_tmp_data, out, insert_pre_flag);
+}
+
+bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
+                                           const SerialPacketData& data,
+                                           SerialPacketData& out,
+                                           bool insert_pre_flag) {
+  // Encode packet in _tmp_data.
+  _tmp_data.clear();
+  _tmp_data.add_uint8(TYPE_RESPONSE);
+  _tmp_data.add_uint32(cmd_id);
+  _tmp_data.add_uint8(status);
+  _tmp_data.add_data(data);
+  _tmp_data.add_uint16(_tmp_data.crc16());
+  if (_tmp_data.write_error()) {
     return false;
   }
 
-  return true;
+  // Byte stuffed into the outupt data.
+  return byte_stuffing(_tmp_data, out, insert_pre_flag);
 }
 
+bool PacketEncoder::encode_message_packet(uint8_t endpoint,
+                                          const SerialPacketData& data,
+                                          SerialPacketData& out,
+                                          bool insert_pre_flag) {
+  // Encode packet in _tmp_data.
+  _tmp_data.clear();
+  _tmp_data.add_uint8(TYPE_MESSAGE);
+  _tmp_data.add_uint8(endpoint);
+  _tmp_data.add_data(data);
+  _tmp_data.add_uint16(_tmp_data.crc16());
+  if (_tmp_data.write_error()) {
+    return false;
+  }
 
+  // Byte stuffed into the outupt data.
+  return byte_stuffing(_tmp_data, out, insert_pre_flag);
+}

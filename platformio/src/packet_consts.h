@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 
-#include "serial_packets.h"
+// #include "serial_packets.h"
 
 // Flag and escape bytes per HDLC specification.
 constexpr uint8_t PACKET_FLAG = 0x7E;
@@ -19,14 +19,14 @@ constexpr uint16_t PRE_FLAG_TIMEOUT_MILLIS = 1000;
 constexpr uint16_t MIN_PACKET_OVERHEAD = 4;
 constexpr uint16_t MAX_PACKET_OVERHEAD = 8;
 
+constexpr uint16_t MAX_DATA_LEN = 1024;
+// constexpr uint16_t TX_BUFFER_LEN = 4096;
+
 // Sizes before flagging and byte stuffing.
 constexpr uint16_t MIN_PACKET_LEN = MIN_PACKET_OVERHEAD;
 constexpr uint16_t MAX_PACKET_LEN = MAX_PACKET_OVERHEAD + MAX_DATA_LEN;
 
-// Range of command timeout values in millis.
-constexpr uint16_t MIN_CMD_TIMEOUT = 100;
-constexpr uint16_t MAX_CMD_TIMEOUT = 10000;
-constexpr uint16_t DEFAULT_CMD_TIMEOUT = 1000;
+
 
 // Numeric values are serialized to the wire so do not change.
 enum PacketType {

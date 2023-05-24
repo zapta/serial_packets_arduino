@@ -6,7 +6,6 @@
 #include <Arduino.h>
 // #include "packet_encoder.h"
 
-// constexpr uint16_t MAX_DATA_LEN = 1024;
 
 // enum SeriaPacketsEvent {
 //   CONNECTED = 1,
