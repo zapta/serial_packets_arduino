@@ -60,7 +60,7 @@ void SerialPacketData::dump(const char* title, Stream& s) {
     if (!_size) {
       return 0;
     }
-    return gen_crc16(_buffer, _size);
+    return packet_crc::gen_crc16(_buffer, _size);
   }
 
 

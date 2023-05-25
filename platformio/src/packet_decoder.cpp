@@ -78,7 +78,7 @@ bool PacketDecoder::process_packet() {
 
   // Check CRC. These are the last two bytes in big endian oder.
   const uint16_t packet_crc = decode_uint16_at_index(_packet_len - 2);
-  const uint16_t computed_crc = gen_crc16(_packet_buffer, _packet_len - 2);
+  const uint16_t computed_crc = packet_crc::gen_crc16(_packet_buffer, _packet_len - 2);
   if (packet_crc != computed_crc) {
     Serial.printf("crc: %04hx vs %04hx\n", packet_crc, computed_crc);
     _logger.error("Incoming packet has bad CRC: %04hu vs %04hu",

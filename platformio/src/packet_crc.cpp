@@ -8,6 +8,9 @@
 
 #define CRC16 0x8005
 
+namespace packet_crc {
+
+
 uint16_t gen_crc16(const uint8_t*  data, const uint16_t size) {
       io::TEST1.set();
 
@@ -66,3 +69,5 @@ uint16_t gen_crc16(const uint8_t*  data, const uint16_t size) {
 
   return crc;
 }
+
+}  // packetcrc
