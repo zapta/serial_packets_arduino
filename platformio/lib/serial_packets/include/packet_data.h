@@ -22,7 +22,7 @@ class PacketData {
 
   inline uint16_t capacity() const { return _capacity; }
   inline uint16_t size() const { return _size; }
-  inline uint16_t bytes_to_read() const { return _size - _bytes_read; }
+  inline uint16_t bytes_left_to_read() const { return _size - _bytes_read; }
   inline bool all_read() const { return _bytes_read >= _size; }
   inline bool read_errors() const { return _read_errors; }
   inline bool write_errors() const { return _read_errors; }

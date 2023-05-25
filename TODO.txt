@@ -6,6 +6,12 @@
 
 * Clean up API documentation (in .h files)
 
+* Adjust python code to match api
+   1. Names of packet data add/read methos.
+   2. read_error -> read_errors
+   3. write_error -> write_errors. 
+   4. Remove bool returned from data read/write methods.
+
 
 
 
