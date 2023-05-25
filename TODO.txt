@@ -1,12 +1,13 @@
 
-* Control buffer sizes by macros users can override.
-
 
 * Evaluate usage of an arduino task scheduler. E.g. https://reference.arduino.cc/reference/en/libraries/taskscheduler . E.g. does it work well with the debugger?
+
+* Clean up API documentation (in .h files)
 
 * Clean up in code TODOs, asserts, etc.
 
 * Figure out how to run unit tests.
+
 
 ----------------
 

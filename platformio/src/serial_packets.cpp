@@ -46,7 +46,7 @@ void SerialPacketsClient::loop_cleanup() {
   _cleanup_timer.reset();
 
   const uint32_t millis_now = millis();
-  for (int i = 0; i < MAX_CMD_CONTEXTS; i++) {
+  for (int i = 0; i < MAX_PENDING_COMMANDS; i++) {
     CommandContext* p = &command_contexts[i];
     // Skip free entries.
     if (!p->cmd_id) {
@@ -230,11 +230,9 @@ bool SerialPacketsClient::sendCommand(
   }
 
   // Verify timeout.
-  if (timeout_millis < MIN_CMD_TIMEOUT_MILLIS ||
-      timeout_millis > MAX_CMD_TIMEOUT_MILLIS) {
-    _logger.error("Invalid command timeout %hu, should be in [%d, %d]",
-                  timeout_millis, MIN_CMD_TIMEOUT_MILLIS,
-                  MAX_CMD_TIMEOUT_MILLIS);
+  if (timeout_millis > MAX_CMD_TIMEOUT_MILLIS) {
+    _logger.error("Invalid command timeout %hu ms, should be at most %d ms",
+                  timeout_millis, MAX_CMD_TIMEOUT_MILLIS);
     return false;
   }
 
@@ -247,7 +245,7 @@ bool SerialPacketsClient::sendCommand(
 
   if (!cmd_context) {
     _logger.error("Can't send a command, too many commands in progress (%d)",
-                  MAX_CMD_CONTEXTS);
+                  MAX_PENDING_COMMANDS);
     return false;
   }
 

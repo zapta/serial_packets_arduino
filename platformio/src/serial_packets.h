@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 
+#include "packet_consts.h"
 #include "packet_timer.h"
 #include "packet_data.h"
 #include "packet_decoder.h"
@@ -13,8 +14,10 @@
 
 // #include "serial_buffer.h"
 
-// Range of command timeout values in millis.
-constexpr uint16_t MIN_CMD_TIMEOUT_MILLIS = 100;
+// Limit of command timeout values in millis. We want to
+// keep timeout values reasonable so we can cleanup the 
+// command context table fast enough to prevent it from 
+// being filled.
 constexpr uint16_t MAX_CMD_TIMEOUT_MILLIS = 10000;
 constexpr uint16_t DEFAULT_CMD_TIMEOUT_MILLIS = 1000;
 
@@ -81,6 +84,7 @@ class SerialPacketsClient {
 
   void loop();
 
+  
   bool sendCommand(byte endpoint, const PacketData& data,
 
                    SerialPacketsCommandResponseHandler response_handler,
@@ -131,9 +135,9 @@ class SerialPacketsClient {
   PacketTimer _cleanup_timer;
 
   // The max number of in-progress outcoing commands.
-  static constexpr uint16_t MAX_CMD_CONTEXTS = 20;
+  // static constexpr uint16_t MAX_CMD_CONTEXTS = 20;
   // Zero initialized.
-  CommandContext command_contexts[MAX_CMD_CONTEXTS];
+  CommandContext command_contexts[MAX_PENDING_COMMANDS];
 
   // bool check_pre_flag();
 
@@ -166,7 +170,7 @@ class SerialPacketsClient {
 
   // Returns null if not found.
   CommandContext* find_context_with_cmd_id(uint32_t cmd_id) {
-    for (int i = 0; i < MAX_CMD_CONTEXTS; i++) {
+    for (int i = 0; i < MAX_PENDING_COMMANDS; i++) {
       if (command_contexts[i].cmd_id == cmd_id) {
         return &command_contexts[i];
       }
