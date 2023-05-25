@@ -6,17 +6,17 @@
 
 // Callback handler for incomming commands.
 // Called within the call to packets.loop(). Should return immediatly.
-void incomingCommandHandler(byte endpoint, const SerialPacketData& data,
+void incomingCommandHandler(byte endpoint, const PacketData& data,
                             byte& response_status,
-                            SerialPacketData& response_data) {
-  response_status = 11;
+                            PacketData& response_data) {
+  response_status = OK;
   response_data.add_uint32(0x12345678);
   Serial.println("Command Handler");
 }
 
 // Callback handler for incomming messages.
 // Called within the call to packets.loop().  Should return immediatly.
-void incomingMessageHandler(byte endpoint, const SerialPacketData& data) {
+void incomingMessageHandler(byte endpoint, const PacketData& data) {
   Serial.println("Message Handler");
 }
 
@@ -38,14 +38,14 @@ void setup() {
 }
 
 static PacketTimer test_command_timer;
-static SerialPacketData test_packet_data(40);
+static PacketData test_packet_data(40);
 static uint32_t test_cmd_id = 0;
 
 // Callback handler for incomming test command response.
 // Called within the call to packets.loop(). Should return immediatly.
-void test_command_response_handler(uint32_t user_data, byte response_status,
-                                   const SerialPacketData& response_data) {
-  Serial.println("Command outcome");
+void test_command_response_handler(uint32_t cmd_id, byte response_status,
+                                   const PacketData& response_data) {
+  Serial.printf("Command outcome id=%08x, status=%hd\n", cmd_id, response_status);
 }
 
 void loop() {
@@ -53,7 +53,7 @@ void loop() {
   packets.loop();
 
   // Periodically send a test command.
-  if (test_command_timer.elapsed_millis() > 1000) {
+  if (test_command_timer.elapsed_millis() > 5000) {
     test_command_timer.reset();
 
     // Send command
@@ -64,7 +64,7 @@ void loop() {
     io::TEST3.set();
 
     if (!packets.sendCommand(0x20, test_packet_data,
-                             test_command_response_handler, test_cmd_id, 500)) {
+                             test_command_response_handler, test_cmd_id, 1000)) {
       Serial.println("sendCommand() failed");
     }
     io::TEST3.clr();

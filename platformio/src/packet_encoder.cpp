@@ -4,8 +4,8 @@
 #include "packet_consts.h"
 #include "serial_packets.h"
 
-bool PacketEncoder::byte_stuffing(const SerialPacketData& in,
-                                  bool insert_pre_flag, SerialPacketData* out) {
+bool PacketEncoder::byte_stuffing(const PacketData& in,
+                                  bool insert_pre_flag, PacketData* out) {
   out->clear();
   const uint16_t capacity = out->capacity();
   uint16_t j = 0;
@@ -56,9 +56,9 @@ bool PacketEncoder::byte_stuffing(const SerialPacketData& in,
 }
 
 bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
-                                          const SerialPacketData& data,
+                                          const PacketData& data,
                                           bool insert_pre_flag,
-                                          SerialPacketData* out) {
+                                          PacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_COMMAND);
@@ -77,9 +77,9 @@ bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
 }
 
 bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
-                                           const SerialPacketData& data,
+                                           const PacketData& data,
                                            bool insert_pre_flag,
-                                           SerialPacketData* out) {
+                                           PacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_RESPONSE);
@@ -98,9 +98,9 @@ bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
 }
 
 bool PacketEncoder::encode_message_packet(uint8_t endpoint,
-                                          const SerialPacketData& data,
+                                          const PacketData& data,
                                           bool insert_pre_flag,
-                                          SerialPacketData* out) {
+                                          PacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.add_uint8(TYPE_MESSAGE);

@@ -42,8 +42,8 @@ enum PacketStatus {
 };
 
 typedef void (*SerialPacketsIncomingCommandHandler)(
-    byte command_endpoint, const SerialPacketData& command_data,
-    byte& response_status, SerialPacketData& response_data);
+    byte command_endpoint, const PacketData& command_data,
+    byte& response_status, PacketData& response_data);
 
 // enum OutcomeCode {
 //   OUTCOME_RESPONSE,
@@ -54,10 +54,10 @@ typedef void (*SerialPacketsIncomingCommandHandler)(
 
 typedef void (*SerialPacketsCommandResponseHandler)(
     uint32_t cmd_id, byte response_status,
-    const SerialPacketData& response_data);
+    const PacketData& response_data);
 
 typedef void (*SerialPacketsIncomingMessageHandler)(
-    byte message_endpoint, const SerialPacketData& message_data);
+    byte message_endpoint, const PacketData& message_data);
 
 typedef void (*SerialPacketsEventHandler)(SeriaPacketsEvent event);
 
@@ -80,12 +80,12 @@ class SerialPacketsClient {
 
   void loop();
 
-  bool sendCommand(byte endpoint, const SerialPacketData& data,
+  bool sendCommand(byte endpoint, const PacketData& data,
 
                    SerialPacketsCommandResponseHandler response_handler,
                    uint32_t& cmd_id, uint16_t timeout);
 
-  bool sendMessage(byte endpoint, const SerialPacketData& data);
+  bool sendMessage(byte endpoint, const PacketData& data);
 
 
  private:
@@ -116,8 +116,8 @@ class SerialPacketsClient {
   Stream* _data_stream = nullptr;
 
 
-  SerialPacketData _tmp_data1;
-  SerialPacketData _tmp_data2;
+  PacketData _tmp_data1;
+  PacketData _tmp_data2;
 
   PacketEncoder _packet_encoder;
   PacketDecoder _packet_decoder;
@@ -126,6 +126,8 @@ class SerialPacketsClient {
   uint32_t _cmd_id_counter = 0;
   // Used to insert pre flag when packates are sparse.
   PacketTimer _pre_flag_timer;
+  // Used to periodically clean up timeout pending commands.
+  PacketTimer _cleanup_timer;
 
   // The max number of in-progress outcoing commands.
   static constexpr uint16_t MAX_CMD_CONTEXTS = 20;
@@ -148,16 +150,18 @@ class SerialPacketsClient {
   // Once the decoder reports a new decoded packet, this is called
   // to process it.
   void process_decoded_response_packet(const DecodedResponseMetadata& metadata,
-                                       const SerialPacketData& data);
+                                       const PacketData& data);
   void process_decoded_command_packet(const DecodedCommandMetadata& metadata,
-                                      const SerialPacketData& data);
+                                      const PacketData& data);
                                       void process_decoded_message_packet(
-    const DecodedMessageMetadata& metadata, const SerialPacketData& data);
+    const DecodedMessageMetadata& metadata, const PacketData& data);
 
                       void force_next_pre_flag() {
                           _pre_flag_timer.set(PRE_FLAG_TIMEOUT_MILLIS + 1);
 
                       }
+  void loop_rx();
+  void loop_cleanup();
 
   // Returns null if not found.
   CommandContext* find_context_with_cmd_id(uint32_t cmd_id) {

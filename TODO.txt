@@ -1,11 +1,11 @@
 
-* Cancel pending commands on timeout.
+* Have logger constructor that accepts logging level.
 
 * Control buffer sizes by macros users can override.
 
 * More scalable command context structure.
 
-* Test message sensind.
+* Test message sensing.
 
 ----------------
 

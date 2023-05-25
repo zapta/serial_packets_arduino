@@ -63,7 +63,7 @@ class PacketDecoder {
 
   const DecodedPacketMetadata& packet_metadata() { return _decoded_metadata; }
 
-  const SerialPacketData& packet_data() { return _decoded_data; }
+  const PacketData& packet_data() { return _decoded_data; }
 
   // For debugging. Return the current number of accomulated bytes.
   uint16_t len() { return _packet_len; }
@@ -92,7 +92,7 @@ class PacketDecoder {
 
   // Valid after returning the status PACKET_AVAILABLE.
   DecodedPacketMetadata _decoded_metadata;
-  SerialPacketData _decoded_data;
+  PacketData _decoded_data;
 
 // Returns true iff a new packet is available.
   bool process_packet();

@@ -12,16 +12,16 @@
 //   DISCONNECTED = 2,
 // };
 
-class SerialPacketData {
+class PacketData {
  public:
-  SerialPacketData(uint16_t capacity = 64) {
+  PacketData(uint16_t capacity = 64) {
     alloc_buffer(capacity);
   }
-  ~SerialPacketData() { release_buffer(); }
+  ~PacketData() { release_buffer(); }
 
   // Disable copying and assignment.
-  SerialPacketData(const SerialPacketData& other) = delete;
-  SerialPacketData& operator=(const SerialPacketData& other) = delete;
+  PacketData(const PacketData& other) = delete;
+  PacketData& operator=(const PacketData& other) = delete;
 
   uint16_t capacity() const { return _capacity; }
   uint16_t size() const { return _size; }
@@ -98,7 +98,7 @@ class SerialPacketData {
     return true;
   }
 
-  bool add_data(const SerialPacketData& data) {
+  bool add_data(const PacketData& data) {
     if (_write_error || data._size > free_bytes()) {
       _write_error = true;
       return false;
@@ -156,7 +156,7 @@ class SerialPacketData {
     return true;
   }
 
-  bool read_data(SerialPacketData& data, uint32_t bytes_to_read) {
+  bool read_data(PacketData& data, uint32_t bytes_to_read) {
     if (_read_error || bytes_to_read > unread_bytes() ||
         bytes_to_read > data.free_bytes()) {
       // Note that we don't set the write error of data.

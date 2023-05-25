@@ -1,11 +1,11 @@
 #include "packet_crc.h"
 #include "serial_packets.h"
 
-void SerialPacketData::dump_data(Stream& s) {
+void PacketData::dump_data(Stream& s) {
   s.println("SerialPacketsData dump TBD");
 }
 
-void SerialPacketData::release_buffer() {
+void PacketData::release_buffer() {
   if (_buffer) {
     delete[] _buffer;
     _buffer = nullptr;
@@ -15,7 +15,7 @@ void SerialPacketData::release_buffer() {
   _bytes_read = 0;
 }
 
-bool SerialPacketData::alloc_buffer(uint16_t capacity) {
+bool PacketData::alloc_buffer(uint16_t capacity) {
   release_buffer();
   // For zero capacity we don't allocate a buffer.
   if (capacity == 0) {
@@ -36,7 +36,7 @@ bool SerialPacketData::alloc_buffer(uint16_t capacity) {
   return true;
 }
 
-void SerialPacketData::dump(const char* title, Stream& s) {
+void PacketData::dump(const char* title, Stream& s) {
   s.println(title);
   s.print("  size: ");
   s.println(_size);
@@ -58,7 +58,7 @@ void SerialPacketData::dump(const char* title, Stream& s) {
 
 static const uint8_t dummy_buffer[0] = {};
 
-uint16_t SerialPacketData::crc16() {
+uint16_t PacketData::crc16() {
   // When _size is zero, _buffer may be null so we pass a
   // dummy pointer instead.
   const uint8_t* p = _size ? _buffer : dummy_buffer;

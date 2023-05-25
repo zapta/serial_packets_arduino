@@ -29,7 +29,7 @@ class PacketLogger {
     if (_stream && is_verbose()) {
       va_list ap;
       va_start(ap, format);
-      _vlog("VERBOSE", format, ap);
+      _vlog("V", format, ap);
       va_end(ap);
     }
   }
@@ -38,7 +38,7 @@ class PacketLogger {
     if (_stream && is_info()) {
       va_list ap;
       va_start(ap, format);
-      _vlog("INFO", format, ap);
+      _vlog("I", format, ap);
       va_end(ap);
     }
   }
@@ -47,7 +47,7 @@ class PacketLogger {
     if (_stream && is_warning()) {
       va_list ap;
       va_start(ap, format);
-      _vlog("WARNING", format, ap);
+      _vlog("W", format, ap);
       va_end(ap);
     }
   }
@@ -56,7 +56,7 @@ class PacketLogger {
     if (_stream && is_error()) {
       va_list ap;
       va_start(ap, format);
-      _vlog("ERROR", format, ap);
+      _vlog("E", format, ap);
       va_end(ap);
     }
   }
