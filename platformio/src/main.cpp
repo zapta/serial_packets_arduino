@@ -53,7 +53,7 @@ void loop() {
   packets.loop();
 
   // Periodically send a test command.
-  if (test_command_timer.elapsed_millis() > 5000) {
+  if (test_command_timer.elapsed_millis() > 1000) {
     test_command_timer.reset();
 
     // Send command
