@@ -56,7 +56,7 @@ class PacketDecoder {
   // };
 
   PacketDecoder(PacketLogger& logger) : _logger(logger),
-   _decoded_data(MAX_DATA_LEN) {}
+   _decoded_data(MAX_PACKET_DATA_LEN) {}
 
   // True if a packet is available.
   bool decode_next_byte(uint8_t);

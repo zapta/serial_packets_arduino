@@ -22,9 +22,9 @@ constexpr uint16_t MAX_PACKET_OVERHEAD = 8;
 // Max size of a packet data. User can override. Impacts memory 
 // usage.
 #ifndef CONFIG_MAX_PACKET_DATA_LEN
-constexpr uint16_t MAX_DATA_LEN = 100;
+constexpr uint16_t MAX_PACKET_DATA_LEN = 100;
 #else
-constexpr uint16_t MAX_DATA_LEN = (CONFIG_MAX_PACKET_DATA_LEN);
+constexpr uint16_t MAX_PACKET_DATA_LEN = (CONFIG_MAX_PACKET_DATA_LEN);
 #endif
 
 // Controls the size of the pending outgoing commands table.
@@ -33,13 +33,13 @@ constexpr uint16_t MAX_DATA_LEN = (CONFIG_MAX_PACKET_DATA_LEN);
 #ifndef CONFIG_MAX_PENDING_COMMANDS
 static constexpr uint16_t MAX_PENDING_COMMANDS = 20;
 #else
-static constexpr uint16_t MAX_CMD_CONTEXTS = (CONFIG_MAX_PENDING_COMMANDS);
+static constexpr uint16_t MAX_PENDING_COMMANDS = (CONFIG_MAX_PENDING_COMMANDS);
 #endif
 
 
 // Sizes before flagging and byte stuffing.
 constexpr uint16_t MIN_PACKET_LEN = MIN_PACKET_OVERHEAD;
-constexpr uint16_t MAX_PACKET_LEN = MAX_PACKET_OVERHEAD + MAX_DATA_LEN;
+constexpr uint16_t MAX_PACKET_LEN = MAX_PACKET_OVERHEAD + MAX_PACKET_DATA_LEN;
 
 
 

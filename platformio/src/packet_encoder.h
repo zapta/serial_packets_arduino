@@ -10,7 +10,7 @@ class PacketEncoder {
  public:
   // Keeps a reference to logger.
   PacketEncoder(PacketLogger& logger)
-      : _logger(logger), _tmp_data(MAX_DATA_LEN) {}
+      : _logger(logger), _tmp_data(MAX_PACKET_DATA_LEN) {}
 
   // Return true iff ok.
   bool encode_command_packet(uint32_t cmd_id, uint8_t endpoint,

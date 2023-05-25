@@ -75,7 +75,7 @@ void loop() {
     if (0) {
       test_packet_data.clear();
       test_packet_data.write_uint8(0x10);
-      test_packet_data.write_uint32(0x12345678);
+      test_packet_data.write_uint32(millis());
 
       if (!packets.sendCommand(0x20, test_packet_data,
                                test_command_response_handler, test_cmd_id,
@@ -88,7 +88,7 @@ void loop() {
     if (1) {
       test_packet_data.clear();
       test_packet_data.write_uint8(0x10);
-      test_packet_data.write_uint32(0x12345678);
+      test_packet_data.write_uint32(millis());
       // data.dump("Command data", Serial);
 
       if (!packets.sendMessage(0x30, test_packet_data)) {
