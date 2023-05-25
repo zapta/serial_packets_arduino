@@ -61,12 +61,12 @@ bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
                                           PacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
-  _tmp_data.add_uint8(TYPE_COMMAND);
-  _tmp_data.add_uint32(cmd_id);
-  _tmp_data.add_uint8(endpoint);
-  _tmp_data.add_data(data);
-  _tmp_data.add_uint16(_tmp_data.crc16());
-  if (_tmp_data.write_error()) {
+  _tmp_data.write_uint8(TYPE_COMMAND);
+  _tmp_data.write_uint32(cmd_id);
+  _tmp_data.write_uint8(endpoint);
+  _tmp_data.write_data(data);
+  _tmp_data.write_uint16(_tmp_data.crc16());
+  if (_tmp_data.write_errors()) {
     _logger.error("Error encoding a command packet. Data size: %hu",
                   data.size());
     return false;
@@ -82,12 +82,12 @@ bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
                                            PacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
-  _tmp_data.add_uint8(TYPE_RESPONSE);
-  _tmp_data.add_uint32(cmd_id);
-  _tmp_data.add_uint8(status);
-  _tmp_data.add_data(data);
-  _tmp_data.add_uint16(_tmp_data.crc16());
-  if (_tmp_data.write_error()) {
+  _tmp_data.write_uint8(TYPE_RESPONSE);
+  _tmp_data.write_uint32(cmd_id);
+  _tmp_data.write_uint8(status);
+  _tmp_data.write_data(data);
+  _tmp_data.write_uint16(_tmp_data.crc16());
+  if (_tmp_data.write_errors()) {
     _logger.error("Error encoding a response packet. Data size: %hu",
                   data.size());
     return false;
@@ -103,11 +103,11 @@ bool PacketEncoder::encode_message_packet(uint8_t endpoint,
                                           PacketData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
-  _tmp_data.add_uint8(TYPE_MESSAGE);
-  _tmp_data.add_uint8(endpoint);
-  _tmp_data.add_data(data);
-  _tmp_data.add_uint16(_tmp_data.crc16());
-  if (_tmp_data.write_error()) {
+  _tmp_data.write_uint8(TYPE_MESSAGE);
+  _tmp_data.write_uint8(endpoint);
+  _tmp_data.write_data(data);
+  _tmp_data.write_uint16(_tmp_data.crc16());
+  if (_tmp_data.write_errors()) {
     _logger.error("Error encoding a response packet. Data size: %hu",
                   data.size());
     return false;

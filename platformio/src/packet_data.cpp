@@ -1,9 +1,9 @@
 #include "packet_crc.h"
 #include "serial_packets.h"
 
-void PacketData::dump_data(Stream& s) {
-  s.println("SerialPacketsData dump TBD");
-}
+// void PacketData::dump_data(Stream& s) const {
+//   s.println("SerialPacketsData dump TBD");
+// }
 
 void PacketData::release_buffer() {
   if (_buffer) {
@@ -36,13 +36,13 @@ bool PacketData::alloc_buffer(uint16_t capacity) {
   return true;
 }
 
-void PacketData::dump(const char* title, Stream& s) {
+void PacketData::dump(const char* title, Stream& s) const {
   s.println(title);
   s.print("  size: ");
   s.println(_size);
   s.print("  bytes read: ");
   s.print(_bytes_read);
-  if (_read_error) {
+  if (_read_errors) {
     s.print(" (error)");
   }
   s.println();
@@ -58,7 +58,7 @@ void PacketData::dump(const char* title, Stream& s) {
 
 static const uint8_t dummy_buffer[0] = {};
 
-uint16_t PacketData::crc16() {
+uint16_t PacketData::crc16() const {
   // When _size is zero, _buffer may be null so we pass a
   // dummy pointer instead.
   const uint8_t* p = _size ? _buffer : dummy_buffer;

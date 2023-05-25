@@ -100,7 +100,7 @@ bool PacketDecoder::process_packet() {
     _decoded_metadata.command.cmd_id = decode_uint32_at_index(1);
     _decoded_metadata.command.endpoint = _packet_buffer[5];
     _decoded_data.clear();
-    _decoded_data.add_bytes(&_packet_buffer[6], _packet_len - 8);
+    _decoded_data.write_bytes(&_packet_buffer[6], _packet_len - 8);
     return true;
   }
 
@@ -115,7 +115,7 @@ bool PacketDecoder::process_packet() {
     _decoded_metadata.response.cmd_id = decode_uint32_at_index(1);
     _decoded_metadata.response.status = _packet_buffer[5];
     _decoded_data.clear();
-    _decoded_data.add_bytes(&_packet_buffer[6], _packet_len - 8);
+    _decoded_data.write_bytes(&_packet_buffer[6], _packet_len - 8);
     return true;
   }
 
@@ -129,7 +129,7 @@ bool PacketDecoder::process_packet() {
     _decoded_metadata.packet_type = TYPE_MESSAGE;
     _decoded_metadata.message.endpoint = _packet_buffer[1];
     _decoded_data.clear();
-    _decoded_data.add_bytes(&_packet_buffer[2], _packet_len - 4);
+    _decoded_data.write_bytes(&_packet_buffer[2], _packet_len - 4);
     return true;
   }
 
