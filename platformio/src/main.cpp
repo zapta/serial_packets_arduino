@@ -29,6 +29,8 @@ static SerialPacketsClient packets(incomingCommandHandler,
                                    incomingMessageHandler, eventHandler);
 
 void setup() {
+  io::setup();
+
   // A serial port for debug information.
   Serial.begin(115200);
   // A serial port for the packets data link.
@@ -54,6 +56,7 @@ void loop() {
 
   // Periodically send a test command.
   if (test_command_timer.elapsed_millis() > 1000) {
+     io::LED.toggle();
     test_command_timer.reset();
 
     // Send command
@@ -61,12 +64,12 @@ void loop() {
     test_packet_data.add_uint8(0x10);
     test_packet_data.add_uint32(0x12345678);
     // data.dump("Command data", Serial);
-    io::TEST3.set();
 
     if (!packets.sendCommand(0x20, test_packet_data,
                              test_command_response_handler, test_cmd_id, 1000)) {
       Serial.println("sendCommand() failed");
     }
-    io::TEST3.clr();
+        //  io::LED.off();
+
   }
 }

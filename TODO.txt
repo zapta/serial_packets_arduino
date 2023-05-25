@@ -5,7 +5,9 @@
 
 * More scalable command context structure.
 
-* Test message sensing.
+* Test message sending.
+
+* Figure out how to run unit tests.
 
 ----------------
 

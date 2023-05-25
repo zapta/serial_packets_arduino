@@ -46,7 +46,7 @@ static const uint16_t CRC_CCITT_TABLE[256] = {
     0x2E93, 0x3EB2, 0x0ED1, 0x1EF0};
 
 uint16_t gen_crc16(const uint8_t* buffer, int size) {
-  io::TEST1.set();
+  io::TEST1.on();
 
   uint16_t tmp;
   uint16_t crc = 0xffff;
@@ -56,7 +56,7 @@ uint16_t gen_crc16(const uint8_t* buffer, int size) {
     crc = (crc << 8) ^ CRC_CCITT_TABLE[tmp];
   }
 
-  io::TEST1.clr();
+  io::TEST1.off();
 
   return crc;
 }
