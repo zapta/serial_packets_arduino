@@ -1,11 +1,12 @@
 
+* Write unit tests for the data, encoder, decoder, classes.
+
+* Clean up in code TODOs, asserts, etc.
 
 
 * Clean up API documentation (in .h files)
 
-* Clean up in code TODOs, asserts, etc.
 
-* Figure out how to run unit tests.
 
 
 ----------------

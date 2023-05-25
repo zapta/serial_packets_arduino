@@ -1,8 +1,5 @@
 // Uring test of the packet crc function.
 
-// NOTE: As for May 2023, the test runs only in verbose mode and
-// does not run when using the platformio hourglass test icron.
-
 // Based on this example.
 // https://github.com/platformio/platformio-examples/blob/develop/unit-testing/calculator/test/test_embedded/test_calculator.cpp
 
