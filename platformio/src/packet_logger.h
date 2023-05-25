@@ -6,10 +6,16 @@ class PacketLogger {
  public:
   enum Level { VERBOSE = 1, INFO = 2, WARNING = 3, ERROR = 4, NONE = 5 };
 
+  PacketLogger() : _level(INFO) {}
+
+  PacketLogger(Level level) : _level(constrain_level(level)) {}
+
   // Setting to nullptr equivalent to no logging.
   void set_stream(Stream* stream) { _stream = stream; }
 
-  void set_level(Level level) { level = constrain(level, VERBOSE, NONE); }
+  void set_level(Level level) { level = constrain_level(level); }
+
+  Level level() { return _level; }
 
   inline bool is_level(Level level) const { return level >= _level; }
 
@@ -23,7 +29,9 @@ class PacketLogger {
 
   inline bool is_none() const { return is_level(NONE); }
 
-
+  static Level constrain_level(Level level) {
+    return constrain(level, VERBOSE, NONE) ;
+  }
 
   void verbose(const char* format, ...) const {
     if (_stream && is_verbose()) {
@@ -85,7 +93,8 @@ class PacketLogger {
   // Optionally null. Not owning this pointer.
   mutable Stream* _stream = nullptr;
   // Will log only levels >= this one.
-  Level _level = WARNING;
+
+  Level _level = VERBOSE;
 
   // _stream should be checked by the caller to be non null.
   void _vlog(const char* level_str, const char* format, va_list args) const {

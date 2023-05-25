@@ -68,6 +68,7 @@ class SerialPacketsClient {
       SerialPacketsIncomingMessageHandler message_handler = nullptr,
       SerialPacketsEventHandler event_handler = nullptr)
       : 
+      _logger(PacketLogger::VERBOSE),
        _command_handler(command_handler),
         _message_handler(message_handler),
         _event_handler(event_handler),
