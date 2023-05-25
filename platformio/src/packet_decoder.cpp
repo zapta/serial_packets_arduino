@@ -81,7 +81,7 @@ bool PacketDecoder::process_packet() {
   const uint16_t computed_crc = packet_crc::gen_crc16(_packet_buffer, _packet_len - 2);
   if (packet_crc != computed_crc) {
     Serial.printf("crc: %04hx vs %04hx\n", packet_crc, computed_crc);
-    _logger.error("Incoming packet has bad CRC: %04hu vs %04hu",
+    _logger.error("Incoming packet has bad CRC: %04hx vs %04hx",
                  packet_crc, computed_crc);
     return false;
   }

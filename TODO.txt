@@ -1,8 +1,11 @@
 
+* Cancel pending commands on timeout.
 
 * Control buffer sizes by macros users can override.
 
 * More scalable command context structure.
+
+* Test message sensind.
 
 ----------------
 

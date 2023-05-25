@@ -9,6 +9,8 @@
 void incomingCommandHandler(byte endpoint, const SerialPacketData& data,
                             byte& response_status,
                             SerialPacketData& response_data) {
+  response_status = 11;
+  response_data.add_uint32(0x12345678);
   Serial.println("Command Handler");
 }
 
@@ -66,5 +68,5 @@ void loop() {
       Serial.println("sendCommand() failed");
     }
     io::TEST3.clr();
-    }
+  }
 }

@@ -1,5 +1,5 @@
-#include "serial_packets.h"
 #include "packet_crc.h"
+#include "serial_packets.h"
 
 void SerialPacketData::dump_data(Stream& s) {
   s.println("SerialPacketsData dump TBD");
@@ -56,12 +56,11 @@ void SerialPacketData::dump(const char* title, Stream& s) {
   s.println();
 }
 
-  uint16_t SerialPacketData::crc16() {
-    if (!_size) {
-      return 0;
-    }
-    return packet_crc::gen_crc16(_buffer, _size);
-  }
+static const uint8_t dummy_buffer[0] = {};
 
-
-
+uint16_t SerialPacketData::crc16() {
+  // When _size is zero, _buffer may be null so we pass a
+  // dummy pointer instead.
+  const uint8_t* p = _size ? _buffer : dummy_buffer;
+  return packet_crc::gen_crc16(p, _size);
+}
