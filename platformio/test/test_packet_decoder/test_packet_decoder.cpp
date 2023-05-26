@@ -19,6 +19,18 @@ static std::unique_ptr<PacketLogger> logger;
 static std::unique_ptr<PacketDecoder> decoder;
 static std::unique_ptr<PacketDecoderInspector> inspector;
 
+void setUp(void) {
+  inspector.reset();
+  decoder.reset();
+  // NOTE: Run platformio verbose test to see any logger output.
+  logger = std::make_unique<PacketLogger>(PacketLogger::VERBOSE);
+  logger->set_stream(&Serial);
+  decoder = std::make_unique<PacketDecoder>(*logger);
+  inspector = std::make_unique<PacketDecoderInspector>(*decoder);
+}
+
+
+// Helper to to decode a list bytes with expected decoder returned statuses.
 static void check_dedoding(PacketDecoder& decoder,
                            const std::vector<uint8_t>& bytes,
                            const std::vector<bool>& expected_statuses) {
@@ -29,13 +41,7 @@ static void check_dedoding(PacketDecoder& decoder,
   }
 }
 
-void setUp(void) {
-  inspector.reset();
-  decoder.reset();
-  logger = std::make_unique<PacketLogger>();
-  decoder = std::make_unique<PacketDecoder>(*logger);
-  inspector = std::make_unique<PacketDecoderInspector>(*decoder);
-}
+
 
 void test_initial_state() {
   TEST_ASSERT_EQUAL(0, inspector->packet_len());

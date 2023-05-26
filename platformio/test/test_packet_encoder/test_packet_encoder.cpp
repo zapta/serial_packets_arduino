@@ -22,7 +22,9 @@ static std::unique_ptr<PacketEncoderInspector> inspector;
 void setUp(void) {
   inspector.reset();
   encoder.reset();
-  logger = std::make_unique<PacketLogger>();
+  // NOTE: Run platformio verbose test to see any logger output.
+  logger = std::make_unique<PacketLogger>(PacketLogger::VERBOSE);
+  logger->set_stream(&Serial);
   encoder = std::make_unique<PacketEncoder>(*logger);
   inspector = std::make_unique<PacketEncoderInspector>(*encoder);
 }
