@@ -6,17 +6,17 @@
 #include <Arduino.h>
 
 #include "packet_consts.h"
-#include "packet_timer.h"
 #include "packet_data.h"
 #include "packet_decoder.h"
 #include "packet_encoder.h"
 #include "packet_logger.h"
+#include "packet_timer.h"
 
 // #include "serial_buffer.h"
 
 // Limit of command timeout values in millis. We want to
-// keep timeout values reasonable so we can cleanup the 
-// command context table fast enough to prevent it from 
+// keep timeout values reasonable so we can cleanup the
+// command context table fast enough to prevent it from
 // being filled.
 constexpr uint16_t MAX_CMD_TIMEOUT_MILLIS = 10000;
 constexpr uint16_t DEFAULT_CMD_TIMEOUT_MILLIS = 1000;
@@ -56,8 +56,7 @@ typedef void (*SerialPacketsIncomingCommandHandler)(
 // };
 
 typedef void (*SerialPacketsCommandResponseHandler)(
-    uint32_t cmd_id, byte response_status,
-    const PacketData& response_data);
+    uint32_t cmd_id, byte response_status, const PacketData& response_data);
 
 typedef void (*SerialPacketsIncomingMessageHandler)(
     byte message_endpoint, const PacketData& message_data);
@@ -70,28 +69,26 @@ class SerialPacketsClient {
       SerialPacketsIncomingCommandHandler command_handler = nullptr,
       SerialPacketsIncomingMessageHandler message_handler = nullptr,
       SerialPacketsEventHandler event_handler = nullptr)
-      : 
-      _logger(PacketLogger::VERBOSE),
-       _command_handler(command_handler),
+      : _logger(PacketLogger::VERBOSE),
+        _command_handler(command_handler),
         _message_handler(message_handler),
         _event_handler(event_handler),
+        _tmp_data1(MAX_PACKET_DATA_LEN),
+        _tmp_data2(MAX_PACKET_DATA_LEN),
         _packet_encoder(_logger),
-        _packet_decoder(_logger)
-         {}
+        _packet_decoder(_logger) {}
 
-  void begin(Stream& data_stream,  Stream& log_stream);
+  void begin(Stream& data_stream, Stream& log_stream);
   void begin(Stream& data_stream);
 
   void loop();
 
-  
   bool sendCommand(byte endpoint, const PacketData& data,
 
                    SerialPacketsCommandResponseHandler response_handler,
                    uint32_t& cmd_id, uint16_t timeout);
 
   bool sendMessage(byte endpoint, const PacketData& data);
-
 
  private:
   struct CommandContext {
@@ -111,7 +108,7 @@ class SerialPacketsClient {
 
   // static  Logger null_logger;
 
-    PacketLogger _logger;
+  PacketLogger _logger;
 
   // Callback handlers. Set by the constructor.
   SerialPacketsIncomingCommandHandler const _command_handler;
@@ -119,7 +116,6 @@ class SerialPacketsClient {
   SerialPacketsEventHandler const _event_handler;
 
   Stream* _data_stream = nullptr;
-
 
   PacketData _tmp_data1;
   PacketData _tmp_data2;
@@ -158,13 +154,12 @@ class SerialPacketsClient {
                                        const PacketData& data);
   void process_decoded_command_packet(const DecodedCommandMetadata& metadata,
                                       const PacketData& data);
-                                      void process_decoded_message_packet(
-    const DecodedMessageMetadata& metadata, const PacketData& data);
+  void process_decoded_message_packet(const DecodedMessageMetadata& metadata,
+                                      const PacketData& data);
 
-                      void force_next_pre_flag() {
-                          _pre_flag_timer.set(PRE_FLAG_TIMEOUT_MILLIS + 1);
-
-                      }
+  void force_next_pre_flag() {
+    _pre_flag_timer.set(PRE_FLAG_TIMEOUT_MILLIS + 1);
+  }
   void loop_rx();
   void loop_cleanup();
 
@@ -179,10 +174,10 @@ class SerialPacketsClient {
   }
 
   bool check_pre_flag() {
-  _data_stream->flush();
-  const bool result =
-      _pre_flag_timer.elapsed_millis() > PRE_FLAG_TIMEOUT_MILLIS;
-  _pre_flag_timer.reset();
-  return result;
-}
+    _data_stream->flush();
+    const bool result =
+        _pre_flag_timer.elapsed_millis() > PRE_FLAG_TIMEOUT_MILLIS;
+    _pre_flag_timer.reset();
+    return result;
+  }
 };

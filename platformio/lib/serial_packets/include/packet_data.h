@@ -13,7 +13,11 @@
 
 class PacketData {
  public:
-  PacketData(uint16_t capacity = 64) { alloc_buffer(capacity); }
+   // Truncates capacity to MAX_PACKET_DATA_LEN.  
+   // If can't allocate, capacity is set to zero.
+  PacketData(uint16_t capacity) { 
+    alloc_buffer(capacity); 
+  }
   ~PacketData() { release_buffer(); }
 
   // Disable copying and assignment.
@@ -25,7 +29,7 @@ class PacketData {
   inline uint16_t bytes_left_to_read() const { return _size - _bytes_read; }
   inline bool all_read() const { return _bytes_read >= _size; }
   inline bool read_errors() const { return _read_errors; }
-  inline bool write_errors() const { return _read_errors; }
+  inline bool write_errors() const { return _write_errors; }
   inline bool all_read_ok() const { return all_read() && !read_errors(); }
 
   void clear() {
@@ -84,7 +88,7 @@ class PacketData {
     // return true;
   }
 
-  void write_bytes(byte bytes[], uint32_t num_bytes) {
+  void write_bytes(const byte bytes[], uint32_t num_bytes) {
     if (_write_errors || num_bytes > free_bytes()) {
       _write_errors = true;
       return ;
@@ -158,7 +162,7 @@ class PacketData {
   void read_data(PacketData& destination, uint32_t bytes_to_read) const {
     if (_read_errors || bytes_to_read > unread_bytes() ||
         bytes_to_read > destination.free_bytes()) {
-      // Note that we don't set the write error of the destinationdata.
+      // Note that we don't set the write error of the destination data.
       _read_errors = true;
       return;
     }
@@ -194,7 +198,8 @@ class PacketData {
   mutable bool _write_errors = false;
 
   void release_buffer();
-  bool alloc_buffer(uint16_t buffer_size);
+  // Truncates capacity to MAX_PACKET_DATA_LEN.
+  void alloc_buffer(uint16_t buffer_size);
 
   friend class PacketEncoder;
   friend class SerialPacketsClient;

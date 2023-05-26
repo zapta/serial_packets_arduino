@@ -15,25 +15,24 @@ void PacketData::release_buffer() {
   _bytes_read = 0;
 }
 
-bool PacketData::alloc_buffer(uint16_t capacity) {
+void PacketData::alloc_buffer(uint16_t capacity) {
   release_buffer();
+
   // For zero capacity we don't allocate a buffer.
   if (capacity == 0) {
-    return true;
+    return;
   }
 
-  // Sanity check the requested size.
-  if (capacity > 1024) {
-    return false;
+  // Constrain max.
+  if (capacity > MAX_PACKET_DATA_LEN) {
+    capacity = MAX_PACKET_DATA_LEN;
   }
 
   // NOTE: The () zeros the array for determinism.
   _buffer = new byte[capacity]();
-  if (!_buffer) {
-    return false;
-  }
+  if (_buffer) {
   _capacity = capacity;
-  return true;
+  }
 }
 
 void PacketData::dump(const char* title, Stream& s) const {
