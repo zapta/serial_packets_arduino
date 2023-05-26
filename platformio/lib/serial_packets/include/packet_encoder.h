@@ -26,6 +26,8 @@ class PacketEncoder {
   bool encode_message_packet(uint8_t endpoint, const PacketData& data,
                              bool insert_pre_flag, PacketData* out);
 
+
+
  private:
   // Non null.
   PacketLogger& _logger;
@@ -34,4 +36,7 @@ class PacketEncoder {
 
   bool byte_stuffing(const PacketData& in, bool insert_pre_flag,
                      PacketData* out);
+
+  friend void test_byte_sutffing_with_pre_flag();
+  friend void test_byte_sutffing_without_pre_flag();
 };

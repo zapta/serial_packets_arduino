@@ -13,9 +13,13 @@
 // For STM32 'black pill'.
 #define BUILTIN_LED PC13
 
+// TODO: Move these two testing function to a shared place
+//  and use in other tests as well.
+
 // Side affect of reseting the reading.
 void assert_data_equals(const PacketData& data,
                         const std::vector<uint8_t> expected) {
+  TEST_ASSERT_EQUAL(data.size(), expected.size());
   data.reset_reading();
   for (int i = 0; i < expected.size(); i++) {
     const uint8_t b = data.read_uint8();
@@ -29,7 +33,7 @@ void assert_data_equals(const PacketData& data,
 
 // Side affect of reseting the reading.
 void populate_data(PacketData& data, const std::vector<uint8_t> bytes) {
-  data.clear();
+  data.clear(); 
   for (int i = 0; i < bytes.size(); i++) {
     data.write_uint8(bytes.at(i));
   }
