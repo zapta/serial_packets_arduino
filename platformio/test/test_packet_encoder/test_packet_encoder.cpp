@@ -61,7 +61,7 @@ void test_encode_command_packet_with_pre_flag() {
   const bool status =
       encoder->encode_command_packet(0x12345678, 0x20, in, true, &out);
   TEST_ASSERT_EQUAL(18, out.size());
-  uint8_t actual[18];
+  uint8_t actual[18] = {};
   out.read_bytes(actual, 18);
   TEST_ASSERT_TRUE(out.all_read_ok());
   const uint8_t expected[18] = {0x7e, 0x01, 0x12, 0x34, 0x56, 0x78,
@@ -78,7 +78,7 @@ void test_encode_command_packet_without_pre_flag() {
   const bool status =
       encoder->encode_command_packet(0x12345678, 0x20, in, false, &out);
   TEST_ASSERT_EQUAL(17, out.size());
-  uint8_t actual[17];
+  uint8_t actual[17] = {};
   out.read_bytes(actual, 17);
   TEST_ASSERT_TRUE(out.all_read_ok());
   const uint8_t expected[17] = {0x01, 0x12, 0x34, 0x56, 0x78, 0x20,
@@ -95,7 +95,7 @@ void test_encode_response_packet_with_pre_flag() {
   const bool status =
       encoder->encode_response_packet(0x12345678, 0x20, in, true, &out);
   TEST_ASSERT_EQUAL(18, out.size());
-  uint8_t actual[18];
+  uint8_t actual[18] = {};
   out.read_bytes(actual, 18);
   TEST_ASSERT_TRUE(out.all_read_ok());
   const uint8_t expected[18] = {0x7e, 0x02, 0x12, 0x34, 0x56, 0x78,
@@ -112,7 +112,7 @@ void test_encode_response_packet_without_pre_flag() {
   const bool status =
       encoder->encode_response_packet(0x12345678, 0x20, in, false, &out);
   TEST_ASSERT_EQUAL(17, out.size());
-  uint8_t actual[17];
+  uint8_t actual[17] = {};
   out.read_bytes(actual, 17);
   TEST_ASSERT_TRUE(out.all_read_ok());
   const uint8_t expected[17] = {0x02, 0x12, 0x34, 0x56, 0x78, 0x20,
@@ -128,7 +128,7 @@ void test_encode_message_packet_with_pre_flag() {
   PacketData out(30);
   const bool status = encoder->encode_message_packet(0x20, in, true, &out);
   TEST_ASSERT_EQUAL(14, out.size());
-  uint8_t actual[14];
+  uint8_t actual[14] = {};
   out.read_bytes(actual, 14);
   TEST_ASSERT_TRUE(out.all_read_ok());
   const uint8_t expected[14] = {0x7e, 0x03, 0x20, 0xff, 0x00, 0x7d, 0x5e,
@@ -143,7 +143,7 @@ void test_encode_message_packet_without_pre_flag() {
   PacketData out(30);
   const bool status = encoder->encode_message_packet(0x20, in, false, &out);
   TEST_ASSERT_EQUAL(13, out.size());
-  uint8_t actual[13];
+  uint8_t actual[13] = {};
   out.read_bytes(actual, 13);
   TEST_ASSERT_TRUE(out.all_read_ok());
   const uint8_t expected[13] = {0x03, 0x20, 0xff, 0x00, 0x7d, 0x5e, 0x22,
