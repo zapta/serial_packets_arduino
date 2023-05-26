@@ -6,10 +6,11 @@
 #include <Arduino.h>
 #include <unity.h>
 
+#include "../common/serial_packets_test_utils.h"
 #include "packet_crc.h"
 
 // For STM32 'black pill'.
-#define BUILTIN_LED PC13
+// #define BUILTIN_LED PC13
 
 void test_empty_data() {
   const uint8_t data[] = {};
@@ -34,10 +35,11 @@ void test_data2() {
 }
 
 void setup() {
-  pinMode(BUILTIN_LED, OUTPUT);
+  common_setup_init();
+  // pinMode(BUILTIN_LED, OUTPUT);
 
   // Time for the USB/CDC serial to stabalize.
-  delay(2000);
+  // delay(2000);
 
   UNITY_BEGIN();
   RUN_TEST(test_empty_data);
@@ -47,8 +49,9 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(500);
-  digitalWrite(BUILTIN_LED, LOW);
-  delay(500);
+  common_loop_body();
+  // digitalWrite(BUILTIN_LED, HIGH);
+  // delay(500);
+  // digitalWrite(BUILTIN_LED, LOW);
+  // delay(500);
 }

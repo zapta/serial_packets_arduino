@@ -55,8 +55,8 @@ class PacketDecoder {
   //   INVALID_PACKET_TYPE,
   // };
 
-  PacketDecoder(PacketLogger& logger) : _logger(logger),
-   _decoded_data(MAX_PACKET_DATA_LEN) {}
+  PacketDecoder(PacketLogger& logger)
+      : _logger(logger), _decoded_data(MAX_PACKET_DATA_LEN) {}
 
   // True if a packet is available.
   bool decode_next_byte(uint8_t);
@@ -69,14 +69,14 @@ class PacketDecoder {
   uint16_t len() { return _packet_len; }
 
  private:
+  // For testing.
+  friend class PacketDecoderInspector;
 
   // None null.
-  PacketLogger&  _logger;
+  PacketLogger& _logger;
 
   uint8_t _packet_buffer[MAX_PACKET_LEN];
-  uint16_t _packet_len;
-
-
+  uint16_t _packet_len = 0;
 
   //  enum State {
   //   IDLE,
@@ -94,7 +94,7 @@ class PacketDecoder {
   DecodedPacketMetadata _decoded_metadata;
   PacketData _decoded_data;
 
-// Returns true iff a new packet is available.
+  // Returns true iff a new packet is available.
   bool process_packet();
 
   inline uint16_t decode_uint16_at_index(uint16_t i) {

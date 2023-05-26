@@ -29,6 +29,9 @@ class PacketEncoder {
 
 
  private:
+  // For testing.
+  friend class PacketEncoderInspector;
+  
   // Non null.
   PacketLogger& _logger;
 
@@ -37,6 +40,8 @@ class PacketEncoder {
   bool byte_stuffing(const PacketData& in, bool insert_pre_flag,
                      PacketData* out);
 
-  friend void test_byte_sutffing_with_pre_flag();
-  friend void test_byte_sutffing_without_pre_flag();
+
+
+  // friend void test_byte_sutffing_with_pre_flag();
+  // friend void test_byte_sutffing_without_pre_flag();
 };
