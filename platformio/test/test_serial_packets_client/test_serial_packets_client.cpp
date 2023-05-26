@@ -28,7 +28,7 @@ struct Message {
 static std::vector<Command> command_list;
 static std::vector<Response> response_list;
 static std::vector<Message> message_list;
-static std::vector<SeriaPacketsEvent> event_list;
+// static std::vector<SeriaPacketsEvent> event_list;
 
 struct FakeResponse {
   void clear() { set(0, {}); }
@@ -71,7 +71,7 @@ void message_handler(byte endpoint, const PacketData& data) {
   message_list.push_back(item);
 }
 
-void eventHandler(SeriaPacketsEvent event) { event_list.push_back(event); }
+// void eventHandler(SeriaPacketsEvent event) { event_list.push_back(event); }
 
 // static std::unique_ptr<PacketLogger> logger;
 static std::unique_ptr<SerialPacketsClient> client;
@@ -81,7 +81,7 @@ void setUp(void) {
   inspector.reset();
   client.reset();
   client = std::make_unique<SerialPacketsClient>(command_handler,
-                                                 message_handler, eventHandler);
+                                                 message_handler);
   inspector = std::make_unique<SerialPacketsClientInspector>(*client);
   Serial2.flush();
   delay(100);
@@ -93,7 +93,7 @@ void setUp(void) {
   command_list.clear();
   response_list.clear();
   message_list.clear();
-  event_list.clear();
+  // event_list.clear();
 }
 
 void test_constructor() {}
@@ -108,7 +108,7 @@ void test_send_message_loop() {
   TEST_ASSERT_EQUAL(0, command_list.size());
   TEST_ASSERT_EQUAL(0, response_list.size());
   TEST_ASSERT_EQUAL(1, message_list.size());
-  TEST_ASSERT_EQUAL(0, event_list.size());
+  // TEST_ASSERT_EQUAL(0, event_list.size());
   const Message& message = message_list.at(0);
   TEST_ASSERT_EQUAL(0x20, message.endpoint);
   assert_vectors_equal(data, message.data);
@@ -129,7 +129,7 @@ void test_send_command_loop() {
   TEST_ASSERT_EQUAL(1, command_list.size());
   TEST_ASSERT_EQUAL(1, response_list.size());
   TEST_ASSERT_EQUAL(0, message_list.size());
-  TEST_ASSERT_EQUAL(0, event_list.size());
+  // TEST_ASSERT_EQUAL(0, event_list.size());
   TEST_ASSERT_EQUAL(0, inspector->num_pending_commands());
   const Command& command = command_list.at(0);
   TEST_ASSERT_EQUAL_HEX8(0x20, command.endpoint);

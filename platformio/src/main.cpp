@@ -33,11 +33,11 @@ void message_handler(byte endpoint, const PacketData& data) {
 
 // Callback handler for Serial Packets events.
 // Called within the call to packets.loop(). Should return immediatly.
-void eventHandler(SeriaPacketsEvent event) { Serial.println("Event Handler"); }
+// void eventHandler(SeriaPacketsEvent event) { Serial.println("Event Handler"); }
 
 // The serial Packets client. We associate it with a serial port in setup().
 static SerialPacketsClient packets(command_handler,
-                                   message_handler, eventHandler);
+                                   message_handler);
 
 void setup() {
   io::setup();

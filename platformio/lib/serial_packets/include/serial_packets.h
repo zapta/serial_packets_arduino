@@ -21,10 +21,10 @@
 constexpr uint16_t MAX_CMD_TIMEOUT_MILLIS = 10000;
 constexpr uint16_t DEFAULT_CMD_TIMEOUT_MILLIS = 1000;
 
-enum SeriaPacketsEvent {
-  CONNECTED = 1,
-  DISCONNECTED = 2,
-};
+// enum SeriaPacketsEvent {
+//   CONNECTED = 1,
+//   DISCONNECTED = 2,
+// };
 
 enum PacketStatus {
   // """Defines status codes. User NAME.value to convert to int.
@@ -61,18 +61,17 @@ typedef void (*SerialPacketsCommandResponseHandler)(
 typedef void (*SerialPacketsIncomingMessageHandler)(
     byte message_endpoint, const PacketData& message_data);
 
-typedef void (*SerialPacketsEventHandler)(SeriaPacketsEvent event);
+// typedef void (*SerialPacketsEventHandler)(SeriaPacketsEvent event);
 
 class SerialPacketsClient {
  public:
   SerialPacketsClient(
       SerialPacketsIncomingCommandHandler command_handler = nullptr,
-      SerialPacketsIncomingMessageHandler message_handler = nullptr,
-      SerialPacketsEventHandler event_handler = nullptr)
+      SerialPacketsIncomingMessageHandler message_handler = nullptr )
       : _logger(PacketLogger::VERBOSE),
         _command_handler(command_handler),
         _message_handler(message_handler),
-        _event_handler(event_handler),
+        // _event_handler(event_handler),
         _tmp_data1(MAX_PACKET_DATA_LEN),
         _tmp_data2(MAX_PACKET_DATA_LEN),
         _packet_encoder(_logger),
@@ -116,7 +115,7 @@ class SerialPacketsClient {
   // Callback handlers. Set by the constructor.
   SerialPacketsIncomingCommandHandler const _command_handler;
   SerialPacketsIncomingMessageHandler const _message_handler;
-  SerialPacketsEventHandler const _event_handler;
+  // SerialPacketsEventHandler const _event_handler;
 
   Stream* _data_stream = nullptr;
 
