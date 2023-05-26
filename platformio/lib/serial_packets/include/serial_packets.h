@@ -91,6 +91,9 @@ class SerialPacketsClient {
   bool sendMessage(byte endpoint, const PacketData& data);
 
  private:
+  // For testing.
+  friend class SerialPacketsClientInspector;
+
   struct CommandContext {
     CommandContext() { clear(); }
 
@@ -133,7 +136,7 @@ class SerialPacketsClient {
   // The max number of in-progress outcoing commands.
   // static constexpr uint16_t MAX_CMD_CONTEXTS = 20;
   // Zero initialized.
-  CommandContext command_contexts[MAX_PENDING_COMMANDS];
+  CommandContext _command_contexts[MAX_PENDING_COMMANDS];
 
   // bool check_pre_flag();
 
@@ -166,8 +169,8 @@ class SerialPacketsClient {
   // Returns null if not found.
   CommandContext* find_context_with_cmd_id(uint32_t cmd_id) {
     for (int i = 0; i < MAX_PENDING_COMMANDS; i++) {
-      if (command_contexts[i].cmd_id == cmd_id) {
-        return &command_contexts[i];
+      if (_command_contexts[i].cmd_id == cmd_id) {
+        return &_command_contexts[i];
       }
     }
     return nullptr;

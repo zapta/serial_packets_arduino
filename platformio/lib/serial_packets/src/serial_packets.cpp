@@ -47,7 +47,7 @@ void SerialPacketsClient::loop_cleanup() {
 
   const uint32_t millis_now = millis();
   for (int i = 0; i < MAX_PENDING_COMMANDS; i++) {
-    CommandContext* p = &command_contexts[i];
+    CommandContext* p = &_command_contexts[i];
     // Skip free entries.
     if (!p->cmd_id) {
       continue;

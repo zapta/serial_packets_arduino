@@ -1,7 +1,4 @@
-// Uring test of the packet crc function.
-
-// Based on this example.
-// https://github.com/platformio/platformio-examples/blob/develop/unit-testing/calculator/test/test_embedded/test_calculator.cpp
+// Unit test of the packet crc function.
 
 #include <Arduino.h>
 #include <unity.h>
@@ -36,10 +33,6 @@ void test_data2() {
 
 void setup() {
   common_setup_init();
-  // pinMode(BUILTIN_LED, OUTPUT);
-
-  // Time for the USB/CDC serial to stabalize.
-  // delay(2000);
 
   UNITY_BEGIN();
   RUN_TEST(test_empty_data);
@@ -48,10 +41,4 @@ void setup() {
   UNITY_END();
 }
 
-void loop() {
-  common_loop_body();
-  // digitalWrite(BUILTIN_LED, HIGH);
-  // delay(500);
-  // digitalWrite(BUILTIN_LED, LOW);
-  // delay(500);
-}
+void loop() { common_loop_body(); }

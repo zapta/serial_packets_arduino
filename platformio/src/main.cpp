@@ -6,7 +6,7 @@
 
 // Callback handler for incomming commands.
 // Called within the call to packets.loop(). Should return immediatly.
-void incomingCommandHandler(byte endpoint, const PacketData& data,
+void command_handler(byte endpoint, const PacketData& data,
                             byte& response_status, PacketData& response_data) {
   response_status = OK;
   response_data.write_uint32(0x12345678);
@@ -15,7 +15,7 @@ void incomingCommandHandler(byte endpoint, const PacketData& data,
 
 // Callback handler for incomming messages.
 // Called within the call to packets.loop().  Should return immediatly.
-void incomingMessageHandler(byte endpoint, const PacketData& data) {
+void message_handler(byte endpoint, const PacketData& data) {
   Serial.printf("Message Handler, endpoint = %02x\n", endpoint);
   data.dump("Message data", Serial);
   const uint8_t v1 = data.read_uint8();
@@ -36,8 +36,8 @@ void incomingMessageHandler(byte endpoint, const PacketData& data) {
 void eventHandler(SeriaPacketsEvent event) { Serial.println("Event Handler"); }
 
 // The serial Packets client. We associate it with a serial port in setup().
-static SerialPacketsClient packets(incomingCommandHandler,
-                                   incomingMessageHandler, eventHandler);
+static SerialPacketsClient packets(command_handler,
+                                   message_handler, eventHandler);
 
 void setup() {
   io::setup();
@@ -56,7 +56,7 @@ static uint32_t test_cmd_id = 0;
 
 // Callback handler for incomming test command response.
 // Called within the call to packets.loop(). Should return immediatly.
-void test_command_response_handler(uint32_t cmd_id, byte response_status,
+void response_handler(uint32_t cmd_id, byte response_status,
                                    const PacketData& response_data) {
   Serial.printf("Command outcome id=%08x, status=%hd\n", cmd_id,
                 response_status);
@@ -78,7 +78,7 @@ void loop() {
       test_packet_data.write_uint32(millis());
 
       if (!packets.sendCommand(0x20, test_packet_data,
-                               test_command_response_handler, test_cmd_id,
+                               response_handler, test_cmd_id,
                                1000)) {
         Serial.println("sendCommand() failed");
       }

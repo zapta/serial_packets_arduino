@@ -1,7 +1,5 @@
-// Uring test of the packet crc function.
+// Unit test of the packet data class.
 
-// Based on this example.
-// https://github.com/platformio/platformio-examples/blob/develop/unit-testing/calculator/test/test_embedded/test_calculator.cpp
 
 #include <Arduino.h>
 #include <unity.h>
@@ -11,36 +9,8 @@
 #include "../common/serial_packets_test_utils.h"
 #include "packet_data.h"
 
-// For STM32 'black pill'.
-// #define BUILTIN_LED PC13
 
-// TODO: Move these two testing function to a shared place
-//  and use in other tests as well.
 
-// Side affect of reseting the reading.
-// void assert_data_equals(const PacketData& data,
-//                         const std::vector<uint8_t> expected) {
-//   TEST_ASSERT_EQUAL(data.size(), expected.size());
-//   data.reset_reading();
-//   for (int i = 0; i < expected.size(); i++) {
-//     const uint8_t b = data.read_uint8();
-//     TEST_ASSERT_FALSE(data.read_errors());
-//     TEST_ASSERT_EQUAL_HEX8(b, expected.at(i));
-//     TEST_ASSERT_FALSE(data.read_errors());
-//   }
-//   TEST_ASSERT_TRUE(data.all_read_ok());
-//   data.reset_reading();
-// }
-
-// // Side affect of reseting the reading.
-// void populate_data(PacketData& data, const std::vector<uint8_t> bytes) {
-//   data.clear();
-//   for (int i = 0; i < bytes.size(); i++) {
-//     data.write_uint8(bytes.at(i));
-//   }
-//   TEST_ASSERT_FALSE(data.write_errors());
-//   assert_data_equals(data, bytes);
-// }
 
 void test_constructor() {
   PacketData d(20);
@@ -302,10 +272,7 @@ void test_read_data_new_dst_error() {
 
 void setup() {
   common_setup_init();
-  // pinMode(BUILTIN_LED, OUTPUT);
-
-  // Time for the USB/CDC serial to stabalize.
-  // delay(2000);
+  
 
   UNITY_BEGIN();
   RUN_TEST(test_constructor);
@@ -340,8 +307,4 @@ void setup() {
 
 void loop() {
   common_loop_body();
-  // digitalWrite(BUILTIN_LED, HIGH);
-  // delay(500);
-  // digitalWrite(BUILTIN_LED, LOW);
-  // delay(500);
 }

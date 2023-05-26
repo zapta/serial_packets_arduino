@@ -1,7 +1,4 @@
-// Uring test of the packet encoder function.
-
-// Based on this example.
-// https://github.com/platformio/platformio-examples/blob/develop/unit-testing/calculator/test/test_embedded/test_calculator.cpp
+// Unit test of the packet encoder function.
 
 #include <Arduino.h>
 #include <unity.h>
