@@ -16,6 +16,15 @@ void populate_data(SerialPacketsData& data, const std::vector<uint8_t> bytes) {
   TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.size());
 }
 
+void fill_data_uint8(SerialPacketsData& data, uint8_t value, int count) {
+  TEST_ASSERT_FALSE(data.write_errors());
+  for (int i = 0; i < count; i++) {
+    data.write_uint8(value);
+    TEST_ASSERT_FALSE(data.write_errors());
+  }
+}
+
+
 std::vector<uint8_t> copy_data(const SerialPacketsData& data) {
   std::vector<uint8_t> result;
   data.reset_reading();

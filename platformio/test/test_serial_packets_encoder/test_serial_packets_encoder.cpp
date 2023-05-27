@@ -16,7 +16,13 @@ static std::unique_ptr<SerialPacketsLogger> logger;
 static std::unique_ptr<SerialPacketsEncoder> encoder;
 static std::unique_ptr<PacketEncoderInspector> inspector;
 
+// These can be large so we don't want to allocate them on stack.
+static SerialPacketsData in;
+static SerialPacketsData out;
+
 void setUp(void) {
+  in.clear();
+  out.clear();
   inspector.reset();
   encoder.reset();
   // NOTE: Run platformio verbose test to see any logger output.
@@ -28,10 +34,10 @@ void setUp(void) {
 
 void test_byte_sutffing_with_pre_flag() {
   // const uint8_t bytes[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(bytes, sizeof(bytes));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(inspector->run_byte_stuffing(in, true, &out));
   // TEST_ASSERT_EQUAL(10, out.size());
   // uint8_t actual[10] = {};
@@ -46,10 +52,10 @@ void test_byte_sutffing_with_pre_flag() {
 
 void test_byte_sutffing_without_pre_flag() {
   // const uint8_t bytes[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(bytes, sizeof(bytes));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(inspector->run_byte_stuffing(in, false, &out));
   // TEST_ASSERT_EQUAL(9, out.size());
   // uint8_t actual[9] = {};
@@ -65,10 +71,10 @@ void test_byte_sutffing_without_pre_flag() {
 
 void test_encode_command_packet_with_pre_flag() {
   // const uint8_t data[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(data, sizeof(data));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(
       encoder->encode_command_packet(0x12345678, 0x20, in, true, &out));
   // TEST_ASSERT_EQUAL(18, out.size());
@@ -86,10 +92,10 @@ void test_encode_command_packet_with_pre_flag() {
 
 void test_encode_command_packet_without_pre_flag() {
   // const uint8_t data[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(data, sizeof(data));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(
       encoder->encode_command_packet(0x12345678, 0x20, in, false, &out));
   // TEST_ASSERT_EQUAL(17, out.size());
@@ -106,10 +112,10 @@ void test_encode_command_packet_without_pre_flag() {
 
 void test_encode_response_packet_with_pre_flag() {
   // const uint8_t data[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(data, sizeof(data));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(
       encoder->encode_response_packet(0x12345678, 0x20, in, true, &out));
   // TEST_ASSERT_EQUAL(18, out.size());
@@ -127,10 +133,10 @@ void test_encode_response_packet_with_pre_flag() {
 
 void test_encode_response_packet_without_pre_flag() {
   // const uint8_t data[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(data, sizeof(data));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(
       encoder->encode_response_packet(0x12345678, 0x20, in, false, &out));
   // TEST_ASSERT_EQUAL(17, out.size());
@@ -147,10 +153,10 @@ void test_encode_response_packet_without_pre_flag() {
 
 void test_encode_message_packet_with_pre_flag() {
   // const uint8_t data[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(data, sizeof(data));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(encoder->encode_message_packet(0x20, in, true, &out));
   // TEST_ASSERT_EQUAL(14, out.size());
   // uint8_t actual[14] = {};
@@ -165,10 +171,10 @@ void test_encode_message_packet_with_pre_flag() {
 
 void test_encode_message_packet_without_pre_flag() {
   // const uint8_t data[] = {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99};
-  SerialPacketsData in(30);
+  // SerialPacketsData in(30);
   populate_data(in, {0xff, 0x00, 0x7e, 0x22, 0x7d, 0x99});
   // in.write_bytes(data, sizeof(data));
-  SerialPacketsData out(30);
+  // SerialPacketsData out(30);
   TEST_ASSERT_TRUE(encoder->encode_message_packet(0x20, in, false, &out));
   // TEST_ASSERT_EQUAL(13, out.size());
   // uint8_t actual[13] = {};

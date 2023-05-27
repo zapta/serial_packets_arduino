@@ -1,98 +1,76 @@
 #include <Arduino.h>
-#include "serial_packets_client.h"
-#include "io.h"
-#include "serial_packets_timer.h"
 
-// Callback handler for incomming commands.
-// Called within the call to packets.loop(). Should return immediatly.
+#include "serial_packets_client.h"
+
+// Callback for incoming commands.
 void command_handler(byte endpoint, const SerialPacketsData& data,
-                            byte& response_status, SerialPacketsData& response_data) {
+                     byte& response_status, SerialPacketsData& response_data) {
+  // Put here code to dispatch the incoming command by its endpoint.
+  Serial.printf("Command Handler called, endpoint=%02x, data=%hu\n", endpoint,
+                data.size());
   response_status = OK;
-  response_data.write_uint32(0x12345678);
-  Serial.println("Command Handler");
+  response_data.write_uint8(0x12);
+  response_data.write_uint16(0x3456);
 }
 
-// Callback handler for incomming messages.
-// Called within the call to packets.loop().  Should return immediatly.
+// Callback for command response.
+void response_handler(uint32_t cmd_id, byte response_status,
+                      const SerialPacketsData& response_data) {
+  Serial.printf("Response Handler called, cmd_id=%08x, status=%hu, size=%hu\n",
+                cmd_id, response_status, response_data.size());
+}
+
+// Callback for incoming messages.
 void message_handler(byte endpoint, const SerialPacketsData& data) {
-  Serial.printf("Message Handler, endpoint = %02x\n", endpoint);
-  data.dump("Message data", Serial);
+  Serial.printf("Message Handler called, endpoint=%02x, data=%hu\n", endpoint,
+                data.size());
   const uint8_t v1 = data.read_uint8();
   const uint32_t v2 = data.read_uint32();
-  if (data.all_read_ok()) {
-        Serial.printf("Read ok: %02hx, %08x\n", v1, v2);
-  } else {
-        Serial.println("Read errors or extra data.");
-  }
-
-    // test_packet_data.add_uint8(0x10);
-    //   test_packet_data.add_uint32(0x12345678);
-
+  Serial.printf("v1=%02x, v2=%08x, ok=%s\n", v1, v2,
+                data.all_read_ok() ? "yes" : "no");
 }
 
-// Callback handler for Serial Packets events.
-// Called within the call to packets.loop(). Should return immediatly.
-// void eventHandler(SeriaPacketsEvent event) { Serial.println("Event Handler"); }
-
-// The serial Packets client. We associate it with a serial port in setup().
-static SerialPacketsClient packets(command_handler,
-                                   message_handler);
+// The serial Packets client.
+static SerialPacketsClient packets(command_handler, message_handler);
 
 void setup() {
-  io::setup();
+  // io::setup();
 
-  // A serial port for debug information.
-  Serial.begin(115200);
-  // A serial port for the packets data link.
+  // We use two serial ports, one for packets communication and one for
+  // debugging.
   Serial2.begin(115200);
-  // The packets datalink client.
+  Serial.begin(115200);
   packets.begin(Serial2, Serial);
 }
 
-static SerialPacketsTimer test_command_timer;
-static SerialPacketsData test_packet_data(40);
+static uint32_t last_send_time_millis = 0;
+static SerialPacketsData test_packet_data;
 static uint32_t test_cmd_id = 0;
-
-// Callback handler for incomming test command response.
-// Called within the call to packets.loop(). Should return immediatly.
-void response_handler(uint32_t cmd_id, byte response_status,
-                                   const SerialPacketsData& response_data) {
-  Serial.printf("Command outcome id=%08x, status=%hd\n", cmd_id,
-                response_status);
-}
 
 void loop() {
   // Service serial packets loop.
   packets.loop();
 
   // Periodically send a test command.
-  if (test_command_timer.elapsed_millis() > 1000) {
-    test_command_timer.reset();
-    io::LED.toggle();
+  if (millis() - last_send_time_millis > 1000) {
+    last_send_time_millis = millis();
 
     // Send command
-    if (0) {
-      test_packet_data.clear();
-      test_packet_data.write_uint8(0x10);
-      test_packet_data.write_uint32(millis());
+    test_packet_data.clear();
+    test_packet_data.write_uint8(0x10);
+    test_packet_data.write_uint32(millis());
 
-      if (!packets.sendCommand(0x20, test_packet_data,
-                               response_handler, test_cmd_id,
-                               1000)) {
-        Serial.println("sendCommand() failed");
-      }
+    if (!packets.sendCommand(0x20, test_packet_data, response_handler,
+                             test_cmd_id, 1000)) {
+      Serial.println("sendCommand() failed");
     }
 
     // Send message
-    if (1) {
-      test_packet_data.clear();
-      test_packet_data.write_uint8(0x10);
-      test_packet_data.write_uint32(millis());
-      // data.dump("Command data", Serial);
-
-      if (!packets.sendMessage(0x30, test_packet_data)) {
-        Serial.println("sendMessage() failed");
-      }
+    test_packet_data.clear();
+    test_packet_data.write_uint8(0x10);
+    test_packet_data.write_uint32(millis());
+    if (!packets.sendMessage(0x30, test_packet_data)) {
+      Serial.println("sendMessage() failed");
     }
   }
 }

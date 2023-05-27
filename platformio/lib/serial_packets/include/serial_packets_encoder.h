@@ -12,7 +12,7 @@ class SerialPacketsEncoder {
  public:
   // Keeps a reference to logger.
   SerialPacketsEncoder(SerialPacketsLogger& logger)
-      : _logger(logger), _tmp_data(MAX_PACKET_DATA_LEN) {}
+      : _logger(logger) {}
 
   // Return true iff ok.
   bool encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
@@ -37,6 +37,7 @@ class SerialPacketsEncoder {
   // Non null.
   SerialPacketsLogger& _logger;
 
+  // Used to encode the packet.
   SerialPacketsData _tmp_data;
 
   bool byte_stuffing(const SerialPacketsData& in, bool insert_pre_flag,
@@ -44,8 +45,5 @@ class SerialPacketsEncoder {
 
 
 
-  // friend void test_byte_sutffing_with_pre_flag();
-  // friend void test_byte_sutffing_without_pre_flag();
 };
 
-// }  // namespace serial_packets

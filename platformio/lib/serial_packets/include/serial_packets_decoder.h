@@ -60,7 +60,7 @@ class SerialPacketsDecoder {
   // };
 
   SerialPacketsDecoder(SerialPacketsLogger& logger)
-      : _logger(logger), _decoded_data(MAX_PACKET_DATA_LEN) {}
+      : _logger(logger) {}
 
   // True if a packet is available.
   bool decode_next_byte(uint8_t);

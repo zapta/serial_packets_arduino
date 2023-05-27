@@ -89,7 +89,11 @@ void message_handler(byte endpoint, const SerialPacketsData& data) {
 static std::unique_ptr<SerialPacketsClient> client;
 static std::unique_ptr<SerialPacketsClientInspector> inspector;
 
+// This buffer can be large so we avoid allocating it on the stack.
+static SerialPacketsData packet_data;
+
 void setUp(void) {
+  packet_data.clear();
   inspector.reset();
   client.reset();
   client =
@@ -128,7 +132,7 @@ void test_constructor() {}
 
 void test_send_message_loop() {
   const std::vector<uint8_t> data = {0x11, 0x22, 0x33};
-  SerialPacketsData packet_data(30);
+  // SerialPacketsData packet_data;
   populate_data(packet_data, data);
   TEST_ASSERT_TRUE(client->sendMessage(0x20, packet_data));
   TEST_ASSERT_EQUAL(0, client->num_pending_commands());
@@ -143,7 +147,7 @@ void test_send_message_loop() {
 
 void test_send_command_loop() {
   const std::vector<uint8_t> data = {0x11, 0x22, 0x33};
-  SerialPacketsData packet_data(30);
+  // SerialPacketsData packet_data;
   populate_data(packet_data, data);
   fake_response.status = 0x99;
   fake_response.data = {0xaa, 0xbb, 0xcc};
@@ -170,7 +174,7 @@ void test_send_command_loop() {
 // was canceled and response handler was called with TIMEOUT status.
 void test_command_timeout() {
   const std::vector<uint8_t> data = {0x11, 0x22, 0x33};
-  SerialPacketsData packet_data(30);
+  // SerialPacketsData packet_data;
   populate_data(packet_data, data);
   // Supress RX in the client to simulate a command timeout.
   inspector->ignore_rx_for_testing(true);

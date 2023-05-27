@@ -1,4 +1,4 @@
-* See if unit config file has something useful for this project.
+* Clean up main program.
 
 * Clean up in code TODOs, asserts, etc.
 

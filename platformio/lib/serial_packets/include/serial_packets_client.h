@@ -74,8 +74,8 @@ class SerialPacketsClient {
         _command_handler(command_handler),
         _message_handler(message_handler),
         // _event_handler(event_handler),
-        _tmp_data1(MAX_PACKET_DATA_LEN),
-        _tmp_data2(MAX_PACKET_DATA_LEN),
+        // _tmp_data1(MAX_PACKET_DATA_LEN),
+        // _tmp_data2(MAX_PACKET_DATA_LEN),
         _packet_encoder(_logger),
         _packet_decoder(_logger) {}
 

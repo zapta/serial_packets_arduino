@@ -7,35 +7,35 @@
 //   s.println("SerialPacketsData dump TBD");
 // }
 
-void SerialPacketsData::release_buffer() {
-  if (_buffer) {
-    delete[] _buffer;
-    _buffer = nullptr;
-  }
-  _capacity = 0;
-  _size = 0;
-  _bytes_read = 0;
-}
+// void SerialPacketsData::release_buffer() {
+//   if (_buffer) {
+//     delete[] _buffer;
+//     _buffer = nullptr;
+//   }
+//   _capacity = 0;
+//   _size = 0;
+//   _bytes_read = 0;
+// }
 
-void SerialPacketsData::alloc_buffer(uint16_t capacity) {
-  release_buffer();
+// void SerialPacketsData::alloc_buffer(uint16_t capacity) {
+//   release_buffer();
 
-  // For zero capacity we don't allocate a buffer.
-  if (capacity == 0) {
-    return;
-  }
+//   // For zero capacity we don't allocate a buffer.
+//   if (capacity == 0) {
+//     return;
+//   }
 
-  // Constrain max.
-  if (capacity > MAX_PACKET_DATA_LEN) {
-    capacity = MAX_PACKET_DATA_LEN;
-  }
+//   // Constrain max.
+//   if (capacity > MAX_PACKET_DATA_LEN) {
+//     capacity = MAX_PACKET_DATA_LEN;
+//   }
 
-  // NOTE: The () zeros the array for determinism.
-  _buffer = new byte[capacity]();
-  if (_buffer) {
-  _capacity = capacity;
-  }
-}
+//   // NOTE: The () zeros the array for determinism.
+//   _buffer = new byte[capacity]();
+//   if (_buffer) {
+//   _capacity = capacity;
+//   }
+// }
 
 void SerialPacketsData::dump(const char* title, Stream& s) const {
   s.println(title);
@@ -48,7 +48,7 @@ void SerialPacketsData::dump(const char* title, Stream& s) const {
   }
   s.println();
   s.print("  capacity: ");
-  s.println(_capacity);
+  s.println(capacity());
   s.print("  data:");
   for (uint16_t i = 0; i < _size; i++) {
     s.print(' ');
@@ -60,8 +60,5 @@ void SerialPacketsData::dump(const char* title, Stream& s) const {
 static const uint8_t dummy_buffer[0] = {};
 
 uint16_t SerialPacketsData::crc16() const {
-  // When _size is zero, _buffer may be null so we pass a
-  // dummy pointer instead.
-  const uint8_t* p = _size ? _buffer : dummy_buffer;
-  return serial_packets_gen_crc16(p, _size);
+  return serial_packets_gen_crc16(_buffer, _size);
 }

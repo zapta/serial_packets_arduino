@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "serial_packets_consts.h"
 // #include "serial_packets_encoder.h"
 
 // enum SeriaPacketsEvent {
@@ -13,18 +14,16 @@
 
 class SerialPacketsData {
  public:
-   // Truncates capacity to MAX_PACKET_DATA_LEN.  
-   // If can't allocate, capacity is set to zero.
-  SerialPacketsData(uint16_t capacity) { 
-    alloc_buffer(capacity); 
-  }
-  ~SerialPacketsData() { release_buffer(); }
 
-  // Disable copying and assignment.
+  SerialPacketsData() { 
+  }
+  ~SerialPacketsData() {  }
+
+  // Disable copying and assignment, to avoid unintentinal overhead.
   SerialPacketsData(const SerialPacketsData& other) = delete;
   SerialPacketsData& operator=(const SerialPacketsData& other) = delete;
 
-  inline uint16_t capacity() const { return _capacity; }
+  inline uint16_t capacity() const { return sizeof(_buffer); }
   inline uint16_t size() const { return _size; }
   inline uint16_t bytes_left_to_read() const { return _size - _bytes_read; }
   inline bool all_read() const { return _bytes_read >= _size; }
@@ -36,9 +35,6 @@ class SerialPacketsData {
     _size = 0;
     _write_errors = false;
     reset_reading();
-    // _bytes_read = 0;
-    // _read_error = false;
-    // _write_error = false;
   }
 
   void dump(const char* title, Stream& s) const;
@@ -50,8 +46,8 @@ class SerialPacketsData {
     _read_errors = false;
   }
 
-  inline uint16_t free_bytes() const { return _capacity - _size; }
-  inline bool is_full() const { return _size >= _capacity; }
+  inline uint16_t free_bytes() const { return sizeof(_buffer) - _size; }
+  inline bool is_full() const { return _size >= sizeof(_buffer); }
   inline bool is_empty() const { return _size == 0; }
   uint16_t crc16() const;
 
@@ -127,7 +123,7 @@ class SerialPacketsData {
       _read_errors = true;
       return false;
     }
-    byte* p = _buffer + _bytes_read;
+    const uint8_t* p = _buffer + _bytes_read;
     _bytes_read += 2;
 
     return ((uint16_t)p[0] << 8) | ((uint16_t)p[1] << 0);
@@ -138,7 +134,7 @@ class SerialPacketsData {
       _read_errors = true;
       return 0;
     }
-    byte* p = _buffer + _bytes_read;
+    const byte* p = _buffer + _bytes_read;
     _bytes_read += 4;
     return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) |
            ((uint32_t)p[2] << 8) | ((uint32_t)p[3] << 0);
@@ -186,20 +182,13 @@ class SerialPacketsData {
   }
 
  private:
-  // Buffer size in bytes.
-  uint16_t _capacity = 0;
-  // Actual data bytes. <= capacity.
   uint16_t _size = 0;
-  // Null IFF _buffer_size is zero.
-  byte* _buffer = nullptr;
+  uint8_t _buffer[MAX_PACKET_DATA_LEN];
 
   mutable uint16_t _bytes_read = 0;
   mutable bool _read_errors = false;
   mutable bool _write_errors = false;
 
-  void release_buffer();
-  // Truncates capacity to MAX_PACKET_DATA_LEN.
-  void alloc_buffer(uint16_t buffer_size);
 
   friend class SerialPacketsEncoder;
   friend class SerialPacketsClient;

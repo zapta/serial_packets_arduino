@@ -38,7 +38,7 @@ void SerialPacketsClient::loop() {
 // Process cleanup of timeout commands.
 void SerialPacketsClient::loop_cleanup() {
   // A shared, read only empty data.
-  static const SerialPacketsData empty_data(0);
+  // static const SerialPacketsData empty_data(0);
 
   // Perform a cleanup cycle once every 5 ms.
   if (_cleanup_timer.elapsed_millis() < 2) {
@@ -69,7 +69,8 @@ void SerialPacketsClient::loop_cleanup() {
     if (!p->response_handler) {
       _logger.error("No response handler command  %08u.", p->cmd_id);
     } else {
-      p->response_handler(p->cmd_id, TIMEOUT, empty_data);
+      _tmp_data1.clear();
+      p->response_handler(p->cmd_id, TIMEOUT, _tmp_data1);
     }
     p->clear();
   }
@@ -202,14 +203,12 @@ void SerialPacketsClient::process_decoded_response_packet(
 // Process an incoming message packet.
 void SerialPacketsClient::process_decoded_message_packet(
     const DecodedMessageMetadata& metadata, const SerialPacketsData& data) {
-
   if (!_message_handler) {
     _logger.error("No message handler to dispatch an incoming message.");
     return;
   }
 
   _message_handler(metadata.endpoint, data);
-
 }
 
 bool SerialPacketsClient::sendCommand(
@@ -262,7 +261,8 @@ bool SerialPacketsClient::sendCommand(
   // Push to TX buffer. It's all or nothing, no partial push.
   const uint16_t size = _tmp_data1.size();
   const int available = _data_stream->availableForWrite();
-  _logger.verbose("Available: %d, size: %hu", available, size);
+  _logger.verbose("Available to send: %d, command packet size: %hu", available,
+                  size);
   if (available < size) {
     _logger.error(
         "Can't send a command packet of size %hu, TX buffer has only %d "
@@ -299,35 +299,41 @@ bool SerialPacketsClient::sendCommand(
 
 bool SerialPacketsClient::sendMessage(byte endpoint,
                                       const SerialPacketsData& data) {
-  
-
   // Determine if to insert a packet flag.
   const bool insert_pre_flag = check_pre_flag();
 
   // Encode the packet in wire format.
   if (!_packet_encoder.encode_message_packet(endpoint, data, insert_pre_flag,
                                              &_tmp_data1)) {
+    _logger.error("Failed to encode message packet, data_size=%hu",
+                  data.size());
     return false;
   }
 
   // Push to TX buffer. It's all or nothing, no partial push.
   const uint16_t size = _tmp_data1.size();
-  if (_data_stream->availableForWrite() < size) {
+  const int vailable_to_write = _data_stream->availableForWrite();
+  if (vailable_to_write < size) {
+    _logger.error(
+        "Failed to send a message, packet_size: %hu, available to write: %d",
+        size, vailable_to_write);
     return false;
   }
+  _logger.verbose("Sending message packet, size: %hu, available to write: %d",
+                  size, vailable_to_write);
 
   // NOTE: We assume that this will not be blocking since we verified
   // the number of avilable bytes in the buffer. We force large buffer
   // using a build flag such as -DSERIAL_TX_BUFFER_SIZE=4096.
   const uint16_t written = _data_stream->write(_tmp_data1._buffer, size);
 
+  _logger.verbose("Written: %hu of %hu message packet bytes", written, size);
+
   if (written < size) {
     _logger.error("Only %hu of %hu of a message packet bytes were written",
                   written, size);
     force_next_pre_flag();
   }
-
- 
 
   // cmd_id = new_cmd_id;
   return true;

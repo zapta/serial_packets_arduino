@@ -10,6 +10,8 @@
 // Side affect of reseting the reading.
 void populate_data(SerialPacketsData& data, const std::vector<uint8_t> bytes);
 
+void fill_data_uint8(SerialPacketsData& data, uint8_t value, int count);
+
 std::vector<uint8_t> copy_data(const SerialPacketsData& data);
 
 void assert_data_equals(const SerialPacketsData& data,
