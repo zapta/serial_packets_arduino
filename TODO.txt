@@ -1,6 +1,4 @@
 
-* Clean up in code TODOs, asserts, etc.
-
 * Clean up API documentation (in .h files)
 
 * Adjust python code to match api

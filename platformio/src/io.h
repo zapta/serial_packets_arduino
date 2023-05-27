@@ -1,7 +1,6 @@
 #pragma once
 
-// TODO: Skip the HAL and access read/write the pins directly from the
-// registers.
+// TODO: Consider to skip the HAL and access gpio registers directly.
 
 #include <Arduino.h>
 

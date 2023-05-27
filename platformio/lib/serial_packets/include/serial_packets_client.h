@@ -82,13 +82,9 @@ class SerialPacketsClient {
   // Send a command to given endpoint and with given data. Use the
   // provided response_handler to pass the command response or
   // timeout information. Returns true if the command was sent.
-  //
-  // TODO: Pass also uint32_t user data.
   bool sendCommand(byte endpoint, const SerialPacketsData& data,
                    SerialPacketsCommandResponseHandler response_handler,
                    uint32_t& cmd_id, uint16_t timeout);
-
-  // TODO: add a cancelCommand() method.
 
   // Send a message to given endpoint and with given data. Returns
   // true if the message was sent. There is not positive verification

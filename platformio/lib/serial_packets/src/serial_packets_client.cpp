@@ -1,8 +1,5 @@
 #include "serial_packets_client.h"
 
-// TODO: All methods should verify that begin() was called and that the
-// client is active.
-
 using serial_packets_consts::TYPE_COMMAND;
 using serial_packets_consts::TYPE_MESSAGE;
 using serial_packets_consts::TYPE_RESPONSE;
@@ -88,7 +85,9 @@ void SerialPacketsClient::loop_rx() {
     const uint16_t bytes_read =
         _data_stream->readBytes(rx_transfer_buffer, count);
     n -= bytes_read;
-    // TODO: Assert that bytes_read == count, or at least > 0.
+    if (bytes_read != count) {
+      _logger.error("RX: expected %hu bytes, got %hu", count, bytes_read);
+    }
 
     // A special hook for testing. This allows to simulate command
     // timeout.
