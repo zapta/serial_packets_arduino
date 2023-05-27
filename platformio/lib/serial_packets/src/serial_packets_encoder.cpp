@@ -13,8 +13,8 @@ using serial_packets_consts::TYPE_RESPONSE;
 using serial_packets_consts::TYPE_MESSAGE;
 // namespace serial_packets {
 
-bool SerialPacketsEncoder::byte_stuffing(const SerialPacketsData& in,
-                                  bool insert_pre_flag, SerialPacketsData* out) {
+bool SerialPacketsEncoder::byte_stuffing(const EncodedPacketBuffer& in,
+                                  bool insert_pre_flag, StuffedPacketBuffer* out) {
   out->clear();
   const uint16_t capacity = out->capacity();
   uint16_t j = 0;
@@ -67,13 +67,13 @@ bool SerialPacketsEncoder::byte_stuffing(const SerialPacketsData& in,
 bool SerialPacketsEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
                                           const SerialPacketsData& data,
                                           bool insert_pre_flag,
-                                          SerialPacketsData* out) {
+                                          StuffedPacketBuffer* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.write_uint8(TYPE_COMMAND);
   _tmp_data.write_uint32(cmd_id);
   _tmp_data.write_uint8(endpoint);
-  _tmp_data.write_data(data);
+  _tmp_data.write_bytes(data._buffer, data._size);
   _tmp_data.write_uint16(_tmp_data.crc16());
   if (_tmp_data.had_write_errors()) {
     _logger.error("Error encoding a command packet. Data size: %hu",
@@ -88,13 +88,13 @@ bool SerialPacketsEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoi
 bool SerialPacketsEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
                                            const SerialPacketsData& data,
                                            bool insert_pre_flag,
-                                           SerialPacketsData* out) {
+                                           StuffedPacketBuffer* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.write_uint8(TYPE_RESPONSE);
   _tmp_data.write_uint32(cmd_id);
   _tmp_data.write_uint8(status);
-  _tmp_data.write_data(data);
+  _tmp_data.write_bytes(data._buffer, data._size);
   _tmp_data.write_uint16(_tmp_data.crc16());
   if (_tmp_data.had_write_errors()) {
     _logger.error("Error encoding a response packet. Data size: %hu",
@@ -109,12 +109,12 @@ bool SerialPacketsEncoder::encode_response_packet(uint32_t cmd_id, uint8_t statu
 bool SerialPacketsEncoder::encode_message_packet(uint8_t endpoint,
                                           const SerialPacketsData& data,
                                           bool insert_pre_flag,
-                                          SerialPacketsData* out) {
+                                          StuffedPacketBuffer* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.write_uint8(TYPE_MESSAGE);
   _tmp_data.write_uint8(endpoint);
-  _tmp_data.write_data(data);
+  _tmp_data.write_bytes(data._buffer, data._size);
   _tmp_data.write_uint16(_tmp_data.crc16());
   if (_tmp_data.had_write_errors()) {
     _logger.error("Error encoding a response packet. Data size: %hu",

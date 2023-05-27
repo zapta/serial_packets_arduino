@@ -55,7 +55,7 @@ class SerialPacketsClient {
   SerialPacketsClient(
       SerialPacketsIncomingCommandHandler command_handler = nullptr,
       SerialPacketsIncomingMessageHandler message_handler = nullptr)
-      : _logger(SerialPacketsLogger::VERBOSE),
+      : _logger(SERIAL_PACKETS_LOG_VERBOSE),
         _optional_command_handler(command_handler),
         _optional_message_handler(message_handler),
         _packet_encoder(_logger),
@@ -73,6 +73,11 @@ class SerialPacketsClient {
   // It process incoming data, invokes the callback handlers
   // and cleans up timeout commands.
   void loop();
+
+  // Adjust log level. If 
+  void setLogLevel(SerialPacketsLogLevel level) {
+    _logger.set_level(level);
+  }
 
   // Send a command to given endpoint and with given data. Use the
   // provided response_handler to pass the command response or
@@ -135,8 +140,9 @@ class SerialPacketsClient {
 
   Stream* _data_stream = nullptr;
 
-  SerialPacketsData _tmp_data1;
-  SerialPacketsData _tmp_data2;
+  SerialPacketsData _tmp_data;
+  StuffedPacketBuffer _tmp_stuffed_packet;
+
 
   SerialPacketsEncoder _packet_encoder;
   SerialPacketsDecoder _packet_decoder;
@@ -150,6 +156,11 @@ class SerialPacketsClient {
 
   // A table that contains information about pending commands.
   CommandContext _command_contexts[MAX_PENDING_COMMANDS];
+
+  // Returns true if begun already called.
+  inline bool begun() {
+    return _data_stream != nullptr;
+  }
 
   // Assign a fresh command id. Guaranteed to be non zero.
   // Wrap arounds are OK since we clea up timeout commands.

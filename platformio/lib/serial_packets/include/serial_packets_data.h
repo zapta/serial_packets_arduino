@@ -1,22 +1,26 @@
-// A buffer for serialization/deserialization of packet data.
+// A class with bytes buffer and data serialization/desertailization.
+// Buffer size is fixed at build time to allow static allocation of RAM.
+// Three different sizes are provided using template specialization.
 
 #pragma once
 
 #include <Arduino.h>
 
 #include "serial_packets_consts.h"
+#include "serial_packets_crc.h"
 
-class SerialPacketsData {
+template <uint16_t N>
+class SerialPacketsBuffer {
  public:
-  SerialPacketsData() {}
-  ~SerialPacketsData() {}
+  SerialPacketsBuffer() {}
+  ~SerialPacketsBuffer() {}
 
   // Disable copying and assignment, to avoid unintentinal overhead.
   // These buffers can be large.
-  SerialPacketsData(const SerialPacketsData& other) = delete;
-  SerialPacketsData& operator=(const SerialPacketsData& other) = delete;
+  SerialPacketsBuffer(const SerialPacketsBuffer& other) = delete;
+  SerialPacketsBuffer& operator=(const SerialPacketsBuffer& other) = delete;
 
-  inline uint16_t capacity() const { return sizeof(_buffer); }
+  static inline uint16_t capacity()  { return sizeof(_buffer); }
   inline uint16_t size() const { return _size; }
   inline uint16_t bytes_to_read() const { return _size - _bytes_read; }
   inline bool all_read() const { return _bytes_read >= _size; }
@@ -42,10 +46,28 @@ class SerialPacketsData {
   }
 
   // Write content to a serial port or another stream.
-  void dump(const char* title, Stream& s) const;
+  void dump(const char* title, Stream& s) const {
+    s.println(title);
+    s.print("  size: ");
+    s.println(_size);
+    s.print("  bytes read: ");
+    s.print(_bytes_read);
+    if (_had_read_errors) {
+      s.print(" (error)");
+    }
+    s.println();
+    s.print("  capacity: ");
+    s.println(capacity());
+    s.print("  data:");
+    for (uint16_t i = 0; i < _size; i++) {
+      s.print(' ');
+      s.print(_buffer[i], HEX);
+    }
+    s.println();
+  }
 
   // Compute the data's CRC.
-  uint16_t crc16() const;
+  uint16_t crc16() const { return serial_packets_gen_crc16(_buffer, _size); }
 
   void write_uint8(byte v) {
     if (_had_write_errors || 1 > free_bytes()) {
@@ -88,14 +110,7 @@ class SerialPacketsData {
     _size += num_bytes;
   }
 
-  void write_data(const SerialPacketsData& source) {
-    if (_had_write_errors || source._size > free_bytes()) {
-      _had_write_errors = true;
-      return;
-    }
-    memcpy(&_buffer[_size], source._buffer, source._size);
-    _size += source._size;
-  }
+
 
   uint8_t read_uint8() const {
     if (_had_read_errors || 1 > unread_bytes()) {
@@ -137,20 +152,7 @@ class SerialPacketsData {
     _bytes_read += bytes_to_read;
   }
 
-  // Append read bytes to destination data.
-  void read_data(SerialPacketsData& destination, uint32_t bytes_to_read) const {
-    if (_had_read_errors || bytes_to_read > unread_bytes() ||
-        bytes_to_read > destination.free_bytes()) {
-      // Note that we don't set the write error of the destination data.
-      _had_read_errors = true;
-      return;
-    }
-
-    memcpy(&destination._buffer[destination._size], &_buffer[_bytes_read],
-           bytes_to_read);
-    _bytes_read += bytes_to_read;
-    destination._size += bytes_to_read;
-  }
+  
 
   void skip_bytes(uint32_t bytes_to_skip) const {
     if (_had_read_errors || bytes_to_skip > unread_bytes()) {
@@ -166,9 +168,19 @@ class SerialPacketsData {
   friend class SerialPacketsClient;
 
   uint16_t _size = 0;
-  uint8_t _buffer[MAX_PACKET_DATA_LEN];
+  uint8_t _buffer[N];
 
   mutable uint16_t _bytes_read = 0;
   mutable bool _had_read_errors = false;
   mutable bool _had_write_errors = false;
 };
+
+// For packet payload data only.
+typedef SerialPacketsBuffer<MAX_PACKET_DATA_LEN> SerialPacketsData;
+
+// For encoded packets, before stuffing and flagging. Adding two bytes for pre and 
+// post flags.
+typedef SerialPacketsBuffer<serial_packets_consts::MAX_PACKET_LEN + 2> EncodedPacketBuffer;
+
+// For encoded packets, after stuffing and flagging (wire format). Assuming at most 50% of bytes are stuffed.
+typedef SerialPacketsBuffer<((serial_packets_consts::MAX_PACKET_LEN * 3) / 2) + 2> StuffedPacketBuffer;

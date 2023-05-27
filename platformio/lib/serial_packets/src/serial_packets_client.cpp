@@ -8,29 +8,29 @@ using serial_packets_consts::TYPE_MESSAGE;
 using serial_packets_consts::TYPE_RESPONSE;
 
 void SerialPacketsClient::begin(Stream& data_stream, Stream& log_stream) {
-  if (_data_stream) {
-    log_stream.printf(
-        "ERROR: Already called SerialPacktsBegin.bein(), ignoring.\n");
+  if (begun()) {
+    _logger.error("ERROR: Serial packets begin() already called, ignoring.\n");
     return;
   }
   _data_stream = &data_stream;
   _logger.set_stream(&log_stream);
   force_next_pre_flag();
-  // TODO: Clear variables such as context table.
 }
 
 void SerialPacketsClient::begin(Stream& data_stream) {
-  if (_data_stream) {
-    // Already started. Ignore silently.
+  if (begun()) {
+    _logger.error("ERROR: Serial packets begin() already called, ignoring.\n");
     return;
   }
   _data_stream = &data_stream;
   _logger.set_stream(nullptr);
   force_next_pre_flag();
-  // TODO: Clear variables such as context table.
 }
 
 void SerialPacketsClient::loop() {
+  if (!begun()) {
+    return;
+  }
   loop_rx();
   loop_cleanup();
 }
@@ -69,8 +69,8 @@ void SerialPacketsClient::loop_cleanup() {
     if (!p->response_handler) {
       _logger.error("No response handler command  %08u.", p->cmd_id);
     } else {
-      _tmp_data1.clear();
-      p->response_handler(p->cmd_id, TIMEOUT, _tmp_data1);
+      _tmp_data.clear();
+      p->response_handler(p->cmd_id, TIMEOUT, _tmp_data);
     }
     p->clear();
   }
@@ -85,7 +85,6 @@ void SerialPacketsClient::loop_rx() {
   uint16_t n = _data_stream->available();
   while (n > 0) {
     const uint16_t count = min((uint16_t)sizeof(rx_transfer_buffer), n);
-    // _data_stream->read();
     const uint16_t bytes_read =
         _data_stream->readBytes(rx_transfer_buffer, count);
     n -= bytes_read;
@@ -140,23 +139,24 @@ void SerialPacketsClient::process_decoded_command_packet(
     return;
   }
 
-  _tmp_data1.clear();
+  _tmp_data.clear();
   byte status = OK;
-  _optional_command_handler(metadata.endpoint, data, status, _tmp_data1);
+  _optional_command_handler(metadata.endpoint, data, status, _tmp_data);
 
   // Send response
   // Determine if to insert a packet flag.
   const bool insert_pre_flag = check_pre_flag();
 
   // Encode the packet in wire format.
-  if (!_packet_encoder.encode_response_packet(
-          metadata.cmd_id, status, _tmp_data1, insert_pre_flag, &_tmp_data2)) {
+  if (!_packet_encoder.encode_response_packet(metadata.cmd_id, status,
+                                              _tmp_data, insert_pre_flag,
+                                              &_tmp_stuffed_packet)) {
     _logger.error("Failed to encode response packet. Dropping.");
     return;
   }
 
   // Push to TX buffer. It's all or nothing, no partial push.
-  const uint16_t size = _tmp_data2.size();
+  const uint16_t size = _tmp_stuffed_packet.size();
   if (_data_stream->availableForWrite() < size) {
     _logger.error(
         "Insufficient TX buffer space for sending a response packet "
@@ -167,7 +167,8 @@ void SerialPacketsClient::process_decoded_command_packet(
 
   // NOTE: To increase the TX buffer size, use the build flag
   // -DSERIAL_TX_BUFFER_SIZE=4096.
-  const uint16_t written = _data_stream->write(_tmp_data2._buffer, size);
+  const uint16_t written =
+      _data_stream->write(_tmp_stuffed_packet._buffer, size);
 
   if (written < size) {
     force_next_pre_flag();
@@ -218,6 +219,10 @@ bool SerialPacketsClient::sendCommand(
   // Prepare for failure.
   cmd_id = 0;
 
+  if (!begun()) {
+    return false;
+  }
+
   if (!response_handler) {
     _logger.error("Trying to send a command without a response handler.");
     return false;
@@ -230,12 +235,8 @@ bool SerialPacketsClient::sendCommand(
     return false;
   }
 
-  // Find a free command context. At this point we still leave it
-  // with cmd_id = 0. in case of an early return due to an error.
-  // io::TEST2.on();
-
+  // Find a free command context.
   CommandContext* cmd_context = find_context_with_cmd_id(0);
-  // io::TEST2.off();
 
   if (!cmd_context) {
     _logger.error("Can't send a command, too many commands in progress (%d)",
@@ -251,15 +252,15 @@ bool SerialPacketsClient::sendCommand(
   // io::TEST2.on();
 
   // Encode the packet in wire format.
-  if (!_packet_encoder.encode_command_packet(new_cmd_id, endpoint, data,
-                                             insert_pre_flag, &_tmp_data1)) {
+  if (!_packet_encoder.encode_command_packet(
+          new_cmd_id, endpoint, data, insert_pre_flag, &_tmp_stuffed_packet)) {
     _logger.error("Failed to encode command packet");
     return false;
   }
   // io::TEST2.off();
 
   // Push to TX buffer. It's all or nothing, no partial push.
-  const uint16_t size = _tmp_data1.size();
+  const uint16_t size = _tmp_stuffed_packet.size();
   const int available = _data_stream->availableForWrite();
   _logger.verbose("Available to send: %d, command packet size: %hu", available,
                   size);
@@ -275,7 +276,8 @@ bool SerialPacketsClient::sendCommand(
   // the number of avilable bytes in the buffer. We force large buffer
   // using a build flag such as -DSERIAL_TX_BUFFER_SIZE=4096.
   // io::TEST2.on();
-  const uint16_t written = _data_stream->write(_tmp_data1._buffer, size);
+  const uint16_t written =
+      _data_stream->write(_tmp_stuffed_packet._buffer, size);
   // io::TEST2.off();
   _logger.verbose("Written %hu of %hu command packet bytes", written, size);
 
@@ -299,19 +301,23 @@ bool SerialPacketsClient::sendCommand(
 
 bool SerialPacketsClient::sendMessage(byte endpoint,
                                       const SerialPacketsData& data) {
+  if (!begun()) {
+    return false;
+  }
+
   // Determine if to insert a packet flag.
   const bool insert_pre_flag = check_pre_flag();
 
   // Encode the packet in wire format.
   if (!_packet_encoder.encode_message_packet(endpoint, data, insert_pre_flag,
-                                             &_tmp_data1)) {
+                                             &_tmp_stuffed_packet)) {
     _logger.error("Failed to encode message packet, data_size=%hu",
                   data.size());
     return false;
   }
 
   // Push to TX buffer. It's all or nothing, no partial push.
-  const uint16_t size = _tmp_data1.size();
+  const uint16_t size = _tmp_stuffed_packet.size();
   const int vailable_to_write = _data_stream->availableForWrite();
   if (vailable_to_write < size) {
     _logger.error(
@@ -325,7 +331,8 @@ bool SerialPacketsClient::sendMessage(byte endpoint,
   // NOTE: We assume that this will not be blocking since we verified
   // the number of avilable bytes in the buffer. We force large buffer
   // using a build flag such as -DSERIAL_TX_BUFFER_SIZE=4096.
-  const uint16_t written = _data_stream->write(_tmp_data1._buffer, size);
+  const uint16_t written =
+      _data_stream->write(_tmp_stuffed_packet._buffer, size);
 
   _logger.verbose("Written: %hu of %hu message packet bytes", written, size);
 

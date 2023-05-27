@@ -3,29 +3,64 @@
 #pragma once
 
 #include <Arduino.h>
+
 #include <vector>
+
 #include "serial_packets_client.h"
 
-
 // Side affect of reseting the reading.
-void populate_data(SerialPacketsData& data, const std::vector<uint8_t> bytes);
+template <uint16_t N>
+void populate_data(SerialPacketsBuffer<N>& data,
+                   const std::vector<uint8_t> bytes) {
+  data.clear();
+  TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.capacity());
+  for (int i = 0; i < bytes.size(); i++) {
+    data.write_uint8(bytes.at(i));
+    TEST_ASSERT_FALSE(data.had_write_errors());
+  }
+  TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.size());
+}
 
-void fill_data_uint8(SerialPacketsData& data, uint8_t value, int count);
+template <uint16_t N>
+void fill_data_uint8(SerialPacketsBuffer<N>& data, uint8_t value, int count) {
+  TEST_ASSERT_FALSE(data.had_write_errors());
+  for (int i = 0; i < count; i++) {
+    data.write_uint8(value);
+    TEST_ASSERT_FALSE(data.had_write_errors());
+  }
+}
 
-std::vector<uint8_t> copy_data(const SerialPacketsData& data);
-
-void assert_data_equals(const SerialPacketsData& data,
-                        const std::vector<uint8_t> expected);
+template <uint16_t N>
+std::vector<uint8_t> copy_data(const SerialPacketsBuffer<N>& data) {
+  std::vector<uint8_t> result;
+  data.reset_reading();
+  while (data.bytes_to_read()) {
+    const uint8_t b = data.read_uint8();
+    result.push_back(b);
+    TEST_ASSERT_FALSE(data.had_read_errors());
+  }
+  TEST_ASSERT_TRUE(data.all_read_ok());
+  return result;
+}
 
 void assert_vectors_equal(const std::vector<uint8_t> expected,
                           const std::vector<uint8_t> actual);
+                          
+template <uint16_t N>
+void assert_data_equals(const SerialPacketsBuffer<N>& data,
+                        const std::vector<uint8_t> expected) {
+  const std::vector<uint8_t> data_vect = copy_data(data);
+  assert_vectors_equal(expected, data_vect);
+}
+
+
 
 class PacketEncoderInspector {
  public:
   PacketEncoderInspector(SerialPacketsEncoder& encoder) : _encoder(encoder) {}
 
-  bool run_byte_stuffing(const SerialPacketsData& in, bool insert_pre_flag,
-                         SerialPacketsData* out) {
+  bool run_byte_stuffing(const EncodedPacketBuffer& in, bool insert_pre_flag,
+                         StuffedPacketBuffer* out) {
     return _encoder.byte_stuffing(in, insert_pre_flag, out);
   }
 

@@ -38,10 +38,14 @@ void response_handler(uint32_t cmd_id, byte response_status,
 static SerialPacketsClient packets(command_handler, message_handler);
 
 void setup() {
-  // We use two serial ports, one for packets communication and one for
-  // debugging.
+  // A serial port for packet data communication.
   Serial2.begin(115200);
+
+  // A serial port for debug log.
   Serial.begin(115200);
+
+  // Start the packets client.
+  packets.setLogLevel(SERIAL_PACKETS_LOG_INFO);
   packets.begin(Serial2, Serial);
 }
 

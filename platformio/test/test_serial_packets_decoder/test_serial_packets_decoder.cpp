@@ -21,7 +21,7 @@ void setUp(void) {
   inspector.reset();
   decoder.reset();
   // NOTE: Run platformio verbose test to see any logger output.
-  logger = std::make_unique<SerialPacketsLogger>(SerialPacketsLogger::VERBOSE);
+  logger = std::make_unique<SerialPacketsLogger>(SERIAL_PACKETS_LOG_VERBOSE);
   logger->set_stream(&Serial);
   decoder = std::make_unique<SerialPacketsDecoder>(*logger);
   inspector = std::make_unique<PacketDecoderInspector>(*decoder);

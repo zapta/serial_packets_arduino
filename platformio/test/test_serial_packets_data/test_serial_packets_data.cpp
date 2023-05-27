@@ -118,31 +118,31 @@ void test_write_bytes_new_error() {
   // assert_data_equals(d1, {0x11, 0x22, 0x33});
 }
 
-void test_write_data() {
-  // SerialPacketsData d1;
-  populate_data(d1, {0x11, 0x22});
-  // SerialPacketsData d2;
-  populate_data(d2, {0x33, 0x44, 0x55});
-  d1.write_data(d2);
-  TEST_ASSERT_EQUAL(5, d1.size());
-  TEST_ASSERT_EQUAL_UINT8(0, d1.bytes_read());
-  TEST_ASSERT_EQUAL(5, d1.bytes_to_read());
-  assert_data_equals(d1, {0x11, 0x22, 0x33, 0x44, 0x55});
-}
+// void test_write_data() {
+//   // SerialPacketsData d1;
+//   populate_data(d1, {0x11, 0x22});
+//   // SerialPacketsData d2;
+//   populate_data(d2, {0x33, 0x44, 0x55});
+//   d1.write_data(d2);
+//   TEST_ASSERT_EQUAL(5, d1.size());
+//   TEST_ASSERT_EQUAL_UINT8(0, d1.bytes_read());
+//   TEST_ASSERT_EQUAL(5, d1.bytes_to_read());
+//   assert_data_equals(d1, {0x11, 0x22, 0x33, 0x44, 0x55});
+// }
 
-void test_write_data_new_error() {
-  // SerialPacketsData d1(5);
-  // populate_data(d1, {0x11, 0x22, 0x33});
-  fill_data_uint8(d1, 0x11, d1.capacity() - 2);
-  TEST_ASSERT_FALSE(d1.had_read_errors());
-  TEST_ASSERT_EQUAL(2, d1.free_bytes());
-  // SerialPacketsData d2(20);
-  populate_data(d2, {0x33, 0x44, 0x55});
-  d1.write_data(d2);
-  TEST_ASSERT_TRUE(d1.had_write_errors());
-  TEST_ASSERT_EQUAL(2, d1.free_bytes());
-  // assert_data_equals(d1, {0x11, 0x22, 0x33});
-}
+// void test_write_data_new_error() {
+//   // SerialPacketsData d1(5);
+//   // populate_data(d1, {0x11, 0x22, 0x33});
+//   fill_data_uint8(d1, 0x11, d1.capacity() - 2);
+//   TEST_ASSERT_FALSE(d1.had_read_errors());
+//   TEST_ASSERT_EQUAL(2, d1.free_bytes());
+//   // SerialPacketsData d2(20);
+//   populate_data(d2, {0x33, 0x44, 0x55});
+//   d1.write_data(d2);
+//   TEST_ASSERT_TRUE(d1.had_write_errors());
+//   TEST_ASSERT_EQUAL(2, d1.free_bytes());
+//   // assert_data_equals(d1, {0x11, 0x22, 0x33});
+// }
 
 void test_read_uint8() {
   // SerialPacketsData d1(20);
@@ -235,52 +235,52 @@ void test_read_bytes_new_error() {
   TEST_ASSERT_EQUAL(2, d1.bytes_to_read());
 }
 
-void test_read_data() {
-  // SerialPacketsData d1(20);
-  populate_data(d1, {0x11, 0x22, 0x33, 0x44, 0x55});
-  // SerialPacketsData d2(20);
-  populate_data(d2, {0x88, 0x99});
-  d1.read_data(d2, 2);
-  TEST_ASSERT_FALSE(d1.had_read_errors());
-  assert_data_equals(d2, {0x88, 0x99, 0x11, 0x22});
-  TEST_ASSERT_EQUAL(2, d1.bytes_read());
-  TEST_ASSERT_EQUAL(3, d1.bytes_to_read());
-}
+// void test_read_data() {
+//   // SerialPacketsData d1(20);
+//   populate_data(d1, {0x11, 0x22, 0x33, 0x44, 0x55});
+//   // SerialPacketsData d2(20);
+//   populate_data(d2, {0x88, 0x99});
+//   d1.read_data(d2, 2);
+//   TEST_ASSERT_FALSE(d1.had_read_errors());
+//   assert_data_equals(d2, {0x88, 0x99, 0x11, 0x22});
+//   TEST_ASSERT_EQUAL(2, d1.bytes_read());
+//   TEST_ASSERT_EQUAL(3, d1.bytes_to_read());
+// }
 
 // Trying to read more bytes than available in the source data.
-void test_read_data_new_src_error() {
-  // SerialPacketsData d1(20);
-  populate_data(d1, {0x11, 0x22, 0x33, 0x44});
-  // SerialPacketsData d2(10);
-  populate_data(d2, {0xaa, 0xbb});
-  d1.read_data(d2, 5);
-  TEST_ASSERT_TRUE(d1.had_read_errors());
-  TEST_ASSERT_EQUAL(0, d1.bytes_read());
-  TEST_ASSERT_EQUAL(4, d1.bytes_to_read());
-  TEST_ASSERT_FALSE(d2.had_read_errors());
-  TEST_ASSERT_FALSE(d2.had_write_errors());
+// void test_read_data_new_src_error() {
+//   // SerialPacketsData d1(20);
+//   populate_data(d1, {0x11, 0x22, 0x33, 0x44});
+//   // SerialPacketsData d2(10);
+//   populate_data(d2, {0xaa, 0xbb});
+//   d1.read_data(d2, 5);
+//   TEST_ASSERT_TRUE(d1.had_read_errors());
+//   TEST_ASSERT_EQUAL(0, d1.bytes_read());
+//   TEST_ASSERT_EQUAL(4, d1.bytes_to_read());
+//   TEST_ASSERT_FALSE(d2.had_read_errors());
+//   TEST_ASSERT_FALSE(d2.had_write_errors());
 
-  assert_data_equals(d1, {0x11, 0x22, 0x33, 0x44});
-  assert_data_equals(d2, {0xaa, 0xbb});
-}
+//   assert_data_equals(d1, {0x11, 0x22, 0x33, 0x44});
+//   assert_data_equals(d2, {0xaa, 0xbb});
+// }
 
 // Trying to read more bytes than available in the destination data.
-void test_read_data_new_dst_error() {
+// void test_read_data_new_dst_error() {
 
-  // SerialPacketsData d1(20);
-  populate_data(d1, {0x11, 0x22, 0x33, 0x44});
-    fill_data_uint8(d2, 0x11, d2.capacity()- 3);
-  TEST_ASSERT_EQUAL(3, d2.free_bytes());
-  // SerialPacketsData d2(3);
-  d1.read_data(d2, 4);
-  TEST_ASSERT_TRUE(d1.had_read_errors());
-  TEST_ASSERT_EQUAL(0, d1.bytes_read());
-  TEST_ASSERT_EQUAL(4, d1.bytes_to_read());
-  TEST_ASSERT_FALSE(d2.had_read_errors());
-  TEST_ASSERT_FALSE(d2.had_write_errors());
-  assert_data_equals(d1, {0x11, 0x22, 0x33, 0x44});
-  TEST_ASSERT_EQUAL(3, d2.free_bytes());
-}
+//   // SerialPacketsData d1(20);
+//   populate_data(d1, {0x11, 0x22, 0x33, 0x44});
+//     fill_data_uint8(d2, 0x11, d2.capacity()- 3);
+//   TEST_ASSERT_EQUAL(3, d2.free_bytes());
+//   // SerialPacketsData d2(3);
+//   d1.read_data(d2, 4);
+//   TEST_ASSERT_TRUE(d1.had_read_errors());
+//   TEST_ASSERT_EQUAL(0, d1.bytes_read());
+//   TEST_ASSERT_EQUAL(4, d1.bytes_to_read());
+//   TEST_ASSERT_FALSE(d2.had_read_errors());
+//   TEST_ASSERT_FALSE(d2.had_write_errors());
+//   assert_data_equals(d1, {0x11, 0x22, 0x33, 0x44});
+//   TEST_ASSERT_EQUAL(3, d2.free_bytes());
+// }
 
 void setup() {
   common_setup_init();
@@ -298,8 +298,8 @@ void setup() {
   RUN_TEST(test_write_uint32_new_error);
   RUN_TEST(test_write_bytes);
   RUN_TEST(test_write_bytes_new_error);
-  RUN_TEST(test_write_data);
-  RUN_TEST(test_write_data_new_error);
+  // RUN_TEST(test_write_data);
+  // RUN_TEST(test_write_data_new_error);
 
   // Reading
   RUN_TEST(test_read_uint8);
@@ -310,9 +310,9 @@ void setup() {
   RUN_TEST(test_read_uint32_new_error);
   RUN_TEST(test_read_bytes);
   RUN_TEST(test_read_bytes_new_error);
-  RUN_TEST(test_read_data);
-  RUN_TEST(test_read_data_new_src_error);
-  RUN_TEST(test_read_data_new_dst_error);
+  // RUN_TEST(test_read_data);
+  // RUN_TEST(test_read_data_new_src_error);
+  // RUN_TEST(test_read_data_new_dst_error);
 
   UNITY_END();
 }

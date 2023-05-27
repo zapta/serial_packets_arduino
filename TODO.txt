@@ -1,4 +1,3 @@
-* Change the encoder to user large enough buffers instead of the SerialPacketsData objects.
 
 * Clean up in code TODOs, asserts, etc.
 
@@ -14,6 +13,10 @@
 
 
 ----------------
+
+* Support user data in responed callback.
+
+* Add a client method to cancel a pending command.
 
 Apply arduino code style
 

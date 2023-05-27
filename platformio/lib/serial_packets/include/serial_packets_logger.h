@@ -6,35 +6,43 @@
 
 // namespace serial_packets {
 
+enum SerialPacketsLogLevel {
+  SERIAL_PACKETS_LOG_VERBOSE = 1,
+  SERIAL_PACKETS_LOG_INFO = 2,
+  SERIAL_PACKETS_LOG_WARNING = 3,
+  SERIAL_PACKETS_LOG_ERROR = 4,
+  SERIAL_PACKETS_LOG_NONE = 5
+};
+
 class SerialPacketsLogger {
  public:
-  enum Level { VERBOSE = 1, INFO = 2, WARNING = 3, ERROR = 4, NONE = 5 };
+  // enum Level { VERBOSE = 1, INFO = 2, WARNING = 3, ERROR = 4, NONE = 5 };
 
-  SerialPacketsLogger() : _level(INFO) {}
+  SerialPacketsLogger() : _level(SERIAL_PACKETS_LOG_INFO) {}
 
-  SerialPacketsLogger(Level level) : _level(constrain_level(level)) {}
+  SerialPacketsLogger(SerialPacketsLogLevel level) : _level(constrain_level(level)) {}
 
   // Setting to nullptr equivalent to no logging.
   void set_stream(Stream* stream) { _optional_stream = stream; }
 
-  void set_level(Level level) { level = constrain_level(level); }
+  void set_level(SerialPacketsLogLevel level) { _level = constrain_level(level); }
 
-  Level level() { return _level; }
+  SerialPacketsLogLevel level() { return _level; }
 
-  inline bool is_level(Level level) const { return level >= _level; }
+  inline bool is_level(SerialPacketsLogLevel level) const { return level >= _level; }
 
-  inline bool is_verbose() const { return is_level(VERBOSE); }
+  inline bool is_verbose() const { return is_level(SERIAL_PACKETS_LOG_VERBOSE); }
 
-  inline bool is_info() const { return is_level(INFO); }
+  inline bool is_info() const { return is_level(SERIAL_PACKETS_LOG_INFO); }
 
-  inline bool is_warning() const { return is_level(WARNING); }
+  inline bool is_warning() const { return is_level(SERIAL_PACKETS_LOG_WARNING); }
 
-  inline bool is_error() const { return is_level(ERROR); }
+  inline bool is_error() const { return is_level(SERIAL_PACKETS_LOG_ERROR); }
 
-  inline bool is_none() const { return is_level(NONE); }
+  inline bool is_none() const { return is_level(SERIAL_PACKETS_LOG_NONE); }
 
-  static Level constrain_level(Level level) {
-    return constrain(level, VERBOSE, NONE);
+  static SerialPacketsLogLevel constrain_level(SerialPacketsLogLevel level) {
+    return constrain(level, SERIAL_PACKETS_LOG_VERBOSE, SERIAL_PACKETS_LOG_NONE);
   }
 
   // Log at verbose level.
@@ -81,7 +89,7 @@ class SerialPacketsLogger {
   // Null if not availble. Not the owner of this pointer.
   mutable Stream* _optional_stream = nullptr;
 
-  Level _level = VERBOSE;
+  SerialPacketsLogLevel _level = SERIAL_PACKETS_LOG_VERBOSE;
 
   // _optional_stream should be checked by the caller to be non null.
   void _vlog(const char* level_str, const char* format, va_list args) const {
