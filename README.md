@@ -1,3 +1,13 @@
+# Serial Packets Protocol for Arduino
+
+This library implements the Serial Packets protocol for Arduino and allows an Arduino device to communicate with a Windows/Mac/Linux host computer in a structured way that includes one way messages and round trip command/response. It is compatible for the Python host side implementation at  https://pypi.org/project/serial-packets/.
+
+The library is based on non blocking design that allows parallel command and messages within the Arduino's single thread. Except for very user cases, application should be designed in a non-blocking fashion and should 
+avoid blocking operations such as delay().
+
+The following example demonstrates how the device can communicate with itself using a loop back serial connection (that is, tieing together the serial port's RX and TX lines)
+
+```cpp
 #include <Arduino.h>
 
 #include "Serial_Packets.h"
@@ -84,3 +94,4 @@ void loop() {
     }
   }
 }
+```
