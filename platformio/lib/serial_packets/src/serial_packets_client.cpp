@@ -135,14 +135,14 @@ void SerialPacketsClient::loop_rx() {
 // Process an incoming command packet.
 void SerialPacketsClient::process_decoded_command_packet(
     const DecodedCommandMetadata& metadata, const SerialPacketsData& data) {
-  if (!_command_handler) {
+  if (!_optional_command_handler) {
     _logger.error("No handler for incoming command");
     return;
   }
 
   _tmp_data1.clear();
   byte status = OK;
-  _command_handler(metadata.endpoint, data, status, _tmp_data1);
+  _optional_command_handler(metadata.endpoint, data, status, _tmp_data1);
 
   // Send response
   // Determine if to insert a packet flag.
@@ -203,12 +203,12 @@ void SerialPacketsClient::process_decoded_response_packet(
 // Process an incoming message packet.
 void SerialPacketsClient::process_decoded_message_packet(
     const DecodedMessageMetadata& metadata, const SerialPacketsData& data) {
-  if (!_message_handler) {
+  if (!_optional_message_handler) {
     _logger.error("No message handler to dispatch an incoming message.");
     return;
   }
 
-  _message_handler(metadata.endpoint, data);
+  _optional_message_handler(metadata.endpoint, data);
 }
 
 bool SerialPacketsClient::sendCommand(

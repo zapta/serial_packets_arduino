@@ -75,7 +75,7 @@ bool SerialPacketsEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoi
   _tmp_data.write_uint8(endpoint);
   _tmp_data.write_data(data);
   _tmp_data.write_uint16(_tmp_data.crc16());
-  if (_tmp_data.write_errors()) {
+  if (_tmp_data.had_write_errors()) {
     _logger.error("Error encoding a command packet. Data size: %hu",
                   data.size());
     return false;
@@ -96,7 +96,7 @@ bool SerialPacketsEncoder::encode_response_packet(uint32_t cmd_id, uint8_t statu
   _tmp_data.write_uint8(status);
   _tmp_data.write_data(data);
   _tmp_data.write_uint16(_tmp_data.crc16());
-  if (_tmp_data.write_errors()) {
+  if (_tmp_data.had_write_errors()) {
     _logger.error("Error encoding a response packet. Data size: %hu",
                   data.size());
     return false;
@@ -116,7 +116,7 @@ bool SerialPacketsEncoder::encode_message_packet(uint8_t endpoint,
   _tmp_data.write_uint8(endpoint);
   _tmp_data.write_data(data);
   _tmp_data.write_uint16(_tmp_data.crc16());
-  if (_tmp_data.write_errors()) {
+  if (_tmp_data.had_write_errors()) {
     _logger.error("Error encoding a response packet. Data size: %hu",
                   data.size());
     return false;

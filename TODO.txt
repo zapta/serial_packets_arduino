@@ -1,4 +1,4 @@
-* Clean up main program.
+* Change the encoder to user large enough buffers instead of the SerialPacketsData objects.
 
 * Clean up in code TODOs, asserts, etc.
 

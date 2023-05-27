@@ -1,12 +1,11 @@
-// Internal consts.
+// Serial Packets consts.
 
 #pragma once
 
 #include <Arduino.h>
 
-
-// Max size of a packet data. User can override. Impacts memory 
-// usage.
+// Max size of a packet data. User can override. Impacts memory
+// usage, so use discretion.
 #ifndef CONFIG_MAX_PACKET_DATA_LEN
 constexpr uint16_t MAX_PACKET_DATA_LEN = 100;
 #else
@@ -22,16 +21,15 @@ static constexpr uint16_t MAX_PENDING_COMMANDS = 20;
 static constexpr uint16_t MAX_PENDING_COMMANDS = (CONFIG_MAX_PENDING_COMMANDS);
 #endif
 
+// Internal consts that users don't need to access.
 namespace serial_packets_consts {
-
-// #include "serial_packets.h"
 
 // Flag and escape bytes per HDLC specification.
 constexpr uint8_t PACKET_FLAG = 0x7E;
 constexpr uint8_t PACKET_ESC = 0X7D;
 
-// Prefix a packet with a flag byte only if interval from previous
-// encoded packet is longer that this time in milliseconds.
+// When sending a packet, if the time from previous packate was
+// longer than these, than we insert a pre packet flag byte.
 constexpr uint16_t PRE_FLAG_TIMEOUT_MILLIS = 1000;
 
 // Packet sizes in bytes, with zero data length, and before
@@ -39,22 +37,16 @@ constexpr uint16_t PRE_FLAG_TIMEOUT_MILLIS = 1000;
 constexpr uint16_t MIN_PACKET_OVERHEAD = 4;
 constexpr uint16_t MAX_PACKET_OVERHEAD = 8;
 
-
-
-
-
-
-// Sizes before flagging and byte stuffing.
+// Range of packet lengths before flagging and byte stuffing.
 constexpr uint16_t MIN_PACKET_LEN = MIN_PACKET_OVERHEAD;
 constexpr uint16_t MAX_PACKET_LEN = MAX_PACKET_OVERHEAD + MAX_PACKET_DATA_LEN;
 
-
-
-// Numeric values are serialized to the wire so do not change.
+// The value of the packet_type field of the packet. Defines the
+// packet type.
 enum PacketType {
   TYPE_COMMAND = 1,
   TYPE_RESPONSE = 2,
   TYPE_MESSAGE = 3,
 };
 
-} // namespace serial_packets_consts
+}  // namespace serial_packets_consts

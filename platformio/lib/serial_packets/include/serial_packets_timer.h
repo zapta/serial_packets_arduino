@@ -1,3 +1,4 @@
+// A simple timer for measuring elapsed time in milliseconds.
 #pragma once
 
 #include <Arduino.h>
@@ -9,8 +10,6 @@ class SerialPacketsTimer {
   void reset() { start_millis_ = millis(); }
 
   uint32_t elapsed_millis() { return millis() - start_millis_; }
-
-  void advance(uint32_t interval_millis) { start_millis_ += interval_millis; }
 
   void set(uint32_t elapsed_millis) {
     start_millis_ = millis() - elapsed_millis;

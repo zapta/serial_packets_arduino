@@ -1,3 +1,5 @@
+// Packet decoder.
+
 #pragma once
 
 #include <Arduino.h>
@@ -6,15 +8,8 @@
 #include "serial_packets_data.h"
 #include "serial_packets_logger.h"
 
-// namespace serial_packets {
-// enum DecodedPacketType {
-//   COMMAND,
-//   RESPONSE,
-//   MESSAGE,
-// };
-
-using serial_packets_consts::PacketType;
 using serial_packets_consts::MAX_PACKET_LEN;
+using serial_packets_consts::PacketType;
 
 struct DecodedCommandMetadata {
   uint32_t cmd_id;
@@ -41,71 +36,51 @@ struct DecodedPacketMetadata {
 
 class SerialPacketsDecoder {
  public:
-  // enum DecoderStatus {
-  //   // In normal operation.
-  //   PACKET_START = 1,
-  //   IN_PACKET,
-  //   PACKET_DECODED,
+   // Keeps a reference to logger.
+  SerialPacketsDecoder(SerialPacketsLogger& logger) : _logger(logger) {}
 
-  //   // Errors.
-  //   OVERRUN,
-  //   CONSECUTIVE_ESCAPES,
-  //   INVALID_ESCAPE,
-  //   PACKET_TOO_SHORT,
-  //   BAD_CRC,
-  //   COMMAND_PACKET_TOO_SHORT,
-  //   RESPONSE_PACKET_TOO_SHORT,
-  //   MESSAGE_PACKET_TOO_SHORT,
-  //   INVALID_PACKET_TYPE,
-  // };
-
-  SerialPacketsDecoder(SerialPacketsLogger& logger)
-      : _logger(logger) {}
-
-  // True if a packet is available.
+  // Returns true if a decoded packet became available.
   bool decode_next_byte(uint8_t);
 
+  // Accessors to the decoded packet.
   const DecodedPacketMetadata& packet_metadata() { return _decoded_metadata; }
-
   const SerialPacketsData& packet_data() { return _decoded_data; }
 
-  // For debugging. Return the current number of accomulated bytes.
-  uint16_t len() { return _packet_len; }
+  // For debugging. Return the current number of bytes in the packet buffer.
+  // uint16_t len() { return _packet_len; }
 
  private:
   // For testing.
   friend class PacketDecoderInspector;
 
-  // None null.
   SerialPacketsLogger& _logger;
 
   uint8_t _packet_buffer[MAX_PACKET_LEN];
   uint16_t _packet_len = 0;
 
-  //  enum State {
-  //   IDLE,
-  //   IN_PACKET,
-  //   PACKET_AVAILABLE,
-  //  };
-
-  //  State _state = IDLE;
-
+  // True if collecting packet bytes. False, if waitint for a
+  // flag byte to start a new packet.
   bool _in_packet = false;
-  // Valid in IN_PACKET state only.
+
+  // Valid when _in_packet is true. Indicates if last byte
+  // was the escape byte.
   bool _pending_escape = false;
 
-  // Valid after returning the status PACKET_AVAILABLE.
+  // The decoded packets are stored here for the client to process.
   DecodedPacketMetadata _decoded_metadata;
   SerialPacketsData _decoded_data;
 
-  // Returns true iff a new packet is available.
+  // Called to decode a packet from the packet buffer. Returns true iff a
+  // new packet is available.
   bool process_packet();
 
+  // Decode a big endian uint16.
   inline uint16_t decode_uint16_at_index(uint16_t i) {
     return (((uint16_t)_packet_buffer[i]) << 8) |
            (((uint16_t)_packet_buffer[i + 1]) << 0);
   }
 
+  // Decode a big endian uint32.
   inline uint32_t decode_uint32_at_index(uint16_t i) {
     return (((uint32_t)_packet_buffer[i]) << 24) |
            (((uint32_t)_packet_buffer[i + 1]) << 16) |
@@ -113,5 +88,3 @@ class SerialPacketsDecoder {
            (((uint32_t)_packet_buffer[i + 3]) << 0);
   }
 };
-
-// } // namepspace serial_packets

@@ -43,7 +43,7 @@ void SerialPacketsData::dump(const char* title, Stream& s) const {
   s.println(_size);
   s.print("  bytes read: ");
   s.print(_bytes_read);
-  if (_read_errors) {
+  if (_had_read_errors) {
     s.print(" (error)");
   }
   s.println();

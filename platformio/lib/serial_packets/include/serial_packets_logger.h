@@ -1,3 +1,5 @@
+// A simple logger to an optional serial stream.
+
 #pragma once
 
 #include <Arduino.h>
@@ -13,7 +15,7 @@ class SerialPacketsLogger {
   SerialPacketsLogger(Level level) : _level(constrain_level(level)) {}
 
   // Setting to nullptr equivalent to no logging.
-  void set_stream(Stream* stream) { _stream = stream; }
+  void set_stream(Stream* stream) { _optional_stream = stream; }
 
   void set_level(Level level) { level = constrain_level(level); }
 
@@ -32,11 +34,12 @@ class SerialPacketsLogger {
   inline bool is_none() const { return is_level(NONE); }
 
   static Level constrain_level(Level level) {
-    return constrain(level, VERBOSE, NONE) ;
+    return constrain(level, VERBOSE, NONE);
   }
 
+  // Log at verbose level.
   void verbose(const char* format, ...) const {
-    if (_stream && is_verbose()) {
+    if (_optional_stream && is_verbose()) {
       va_list ap;
       va_start(ap, format);
       _vlog("V", format, ap);
@@ -44,8 +47,9 @@ class SerialPacketsLogger {
     }
   }
 
+  // Log at info level.
   void info(const char* format, ...) const {
-    if (_stream && is_info()) {
+    if (_optional_stream && is_info()) {
       va_list ap;
       va_start(ap, format);
       _vlog("I", format, ap);
@@ -53,8 +57,9 @@ class SerialPacketsLogger {
     }
   }
 
-    void warning(const char* format, ...) const {
-    if (_stream && is_warning()) {
+  // Log at warning level.
+  void warning(const char* format, ...) const {
+    if (_optional_stream && is_warning()) {
       va_list ap;
       va_start(ap, format);
       _vlog("W", format, ap);
@@ -62,8 +67,9 @@ class SerialPacketsLogger {
     }
   }
 
+  // Log at error level.
   void error(const char* format, ...) const {
-    if (_stream && is_error()) {
+    if (_optional_stream && is_error()) {
       va_list ap;
       va_start(ap, format);
       _vlog("E", format, ap);
@@ -71,43 +77,18 @@ class SerialPacketsLogger {
     }
   }
 
-  // Temp for testing.
-  // void log(const char* format, ...) const {
-  //   if (_stream ) {
-  //     va_list ap;
-  //     va_start(ap, format);
-  //     _vlog("XXX", format, ap);
-  //     va_end(ap);
-  //   }
-  // }
-
-  // void log(const char* format, ...) const {
-  //   if (_stream) {
-  //     va_list ap;
-  //     va_start(ap, format);
-  //     _stream->vprintf(format, ap);
-  //     _stream->println();
-  //     va_end(ap);
-  //   }
-  // }
-
  private:
-  // Optionally null. Not owning this pointer.
-  mutable Stream* _stream = nullptr;
-  // Will log only levels >= this one.
+  // Null if not availble. Not the owner of this pointer.
+  mutable Stream* _optional_stream = nullptr;
 
   Level _level = VERBOSE;
 
-  // _stream should be checked by the caller to be non null.
+  // _optional_stream should be checked by the caller to be non null.
   void _vlog(const char* level_str, const char* format, va_list args) const {
-    // if (_stream) {
-    // va_list ap;
-    // va_start(ap, format);
-    _stream->print(level_str);
-    _stream->print(": ");
-    _stream->vprintf(format, args);
-    _stream->println();
-    // va_end(ap);
+    _optional_stream->print(level_str);
+    _optional_stream->print(": ");
+    _optional_stream->vprintf(format, args);
+    _optional_stream->println();
   }
 };
 

@@ -11,16 +11,16 @@ void populate_data(SerialPacketsData& data, const std::vector<uint8_t> bytes) {
   TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.capacity());
   for (int i = 0; i < bytes.size(); i++) {
     data.write_uint8(bytes.at(i));
-    TEST_ASSERT_FALSE(data.write_errors());
+    TEST_ASSERT_FALSE(data.had_write_errors());
   }
   TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.size());
 }
 
 void fill_data_uint8(SerialPacketsData& data, uint8_t value, int count) {
-  TEST_ASSERT_FALSE(data.write_errors());
+  TEST_ASSERT_FALSE(data.had_write_errors());
   for (int i = 0; i < count; i++) {
     data.write_uint8(value);
-    TEST_ASSERT_FALSE(data.write_errors());
+    TEST_ASSERT_FALSE(data.had_write_errors());
   }
 }
 
@@ -28,10 +28,10 @@ void fill_data_uint8(SerialPacketsData& data, uint8_t value, int count) {
 std::vector<uint8_t> copy_data(const SerialPacketsData& data) {
   std::vector<uint8_t> result;
   data.reset_reading();
-  while (data.bytes_left_to_read()) {
+  while (data.bytes_to_read()) {
     const uint8_t b = data.read_uint8();
     result.push_back(b);
-    TEST_ASSERT_FALSE(data.read_errors());
+    TEST_ASSERT_FALSE(data.had_read_errors());
   }
   TEST_ASSERT_TRUE(data.all_read_ok());
   return result;
