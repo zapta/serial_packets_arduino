@@ -1,10 +1,6 @@
+* See if unit config file has something useful for this project.
 
-* Write a unit test for the event handler or drop it all together.
-* Write a unit test for the client timeout cleanup.
-* Have the client class in .h and .cpp files of its own.
-* Have consitent prafix to all the files and the classes. E.g. packets_xxxx or serial_packets_xxxx
 * Clean up in code TODOs, asserts, etc.
-
 
 * Clean up API documentation (in .h files)
 

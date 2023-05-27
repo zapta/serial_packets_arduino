@@ -1,12 +1,22 @@
 
-#include "packet_decoder.h"
+#include "serial_packets_decoder.h"
 
 #include <Arduino.h>
 
-#include "packet_crc.h"
-#include "packet_consts.h"
+#include "serial_packets_crc.h"
+#include "serial_packets_consts.h"
 
-bool PacketDecoder::decode_next_byte(uint8_t b) {
+using serial_packets_consts::PACKET_FLAG;
+using serial_packets_consts::MIN_PACKET_LEN;
+using serial_packets_consts::MAX_PACKET_LEN;
+using serial_packets_consts::PACKET_ESC;
+using serial_packets_consts::TYPE_COMMAND;
+using serial_packets_consts::TYPE_RESPONSE;
+using serial_packets_consts::TYPE_MESSAGE;
+
+// namespace serial_packets {
+
+bool SerialPacketsDecoder::decode_next_byte(uint8_t b) {
   // When not in packet, wait for next  flag byte.
   if (!_in_packet) {
     if (b == PACKET_FLAG) {
@@ -55,7 +65,7 @@ bool PacketDecoder::decode_next_byte(uint8_t b) {
   }
 
   // Handle escape byte. Here _pending_escape is false.
-  if (b == PACKET_ESC) {
+  if (b ==  PACKET_ESC) {
     _pending_escape = true;
     return false;
   }
@@ -65,20 +75,20 @@ bool PacketDecoder::decode_next_byte(uint8_t b) {
 }
 
 // Returns true if a new packet is available.
-bool PacketDecoder::process_packet() {
+bool SerialPacketsDecoder::process_packet() {
   // This is normal in packets that insert pre packet flags.
   if (!_packet_len) {
     return false;
   }
 
-  if (_packet_len < MIN_PACKET_LEN) {
+  if (_packet_len <  MIN_PACKET_LEN) {
     _logger.error("Incoming packet is too short: %hu", _packet_len);
     return false;
   }
 
   // Check CRC. These are the last two bytes in big endian oder.
   const uint16_t packet_crc = decode_uint16_at_index(_packet_len - 2);
-  const uint16_t computed_crc = packet_crc::gen_crc16(_packet_buffer, _packet_len - 2);
+  const uint16_t computed_crc = serial_packets_gen_crc16(_packet_buffer, _packet_len - 2);
   if (packet_crc != computed_crc) {
     // Serial.printf("crc: %04hx vs %04hx\n", packet_crc, computed_crc);
     _logger.error("Incoming packet has bad CRC: %04hx vs %04hx",
@@ -105,7 +115,7 @@ bool PacketDecoder::process_packet() {
   }
 
   // Decode a response packet.
-  if (packet_type == TYPE_RESPONSE) {
+  if (packet_type ==  TYPE_RESPONSE) {
     if (_packet_len < 8) {
       _logger.error("Incoming response packet is too short: %hu",
                    _packet_len);
@@ -120,7 +130,7 @@ bool PacketDecoder::process_packet() {
   }
 
   // Decode a message packet.
-  if (packet_type == TYPE_MESSAGE) {
+  if (packet_type ==  TYPE_MESSAGE) {
     if (_packet_len < 4) {
       _logger.error("Incoming message packet is too short: %hu",
                    _packet_len);
@@ -136,3 +146,5 @@ bool PacketDecoder::process_packet() {
       _logger.error("Incoming packet has an invalid type: %hu", packet_type);
   return false;
 }
+
+// } // namepspace serial_packets

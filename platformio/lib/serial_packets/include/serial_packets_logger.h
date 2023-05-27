@@ -2,13 +2,15 @@
 
 #include <Arduino.h>
 
-class PacketLogger {
+// namespace serial_packets {
+
+class SerialPacketsLogger {
  public:
   enum Level { VERBOSE = 1, INFO = 2, WARNING = 3, ERROR = 4, NONE = 5 };
 
-  PacketLogger() : _level(INFO) {}
+  SerialPacketsLogger() : _level(INFO) {}
 
-  PacketLogger(Level level) : _level(constrain_level(level)) {}
+  SerialPacketsLogger(Level level) : _level(constrain_level(level)) {}
 
   // Setting to nullptr equivalent to no logging.
   void set_stream(Stream* stream) { _stream = stream; }
@@ -108,3 +110,5 @@ class PacketLogger {
     // va_end(ap);
   }
 };
+
+// } // namespace serial_packets

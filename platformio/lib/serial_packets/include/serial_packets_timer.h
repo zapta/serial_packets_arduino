@@ -2,9 +2,9 @@
 
 #include <Arduino.h>
 
-class PacketTimer {
+class SerialPacketsTimer {
  public:
-  PacketTimer() { reset(); }
+  SerialPacketsTimer() { reset(); }
 
   void reset() { start_millis_ = millis(); }
 

@@ -5,12 +5,12 @@
 
 #include <Arduino.h>
 
-#include "packet_consts.h"
-#include "packet_data.h"
-#include "packet_decoder.h"
-#include "packet_encoder.h"
-#include "packet_logger.h"
-#include "packet_timer.h"
+#include "serial_packets_consts.h"
+#include "serial_packets_data.h"
+#include "serial_packets_decoder.h"
+#include "serial_packets_encoder.h"
+#include "serial_packets_logger.h"
+#include "serial_packets_timer.h"
 
 // #include "serial_buffer.h"
 
@@ -26,6 +26,7 @@ constexpr uint16_t DEFAULT_CMD_TIMEOUT_MILLIS = 1000;
 //   DISCONNECTED = 2,
 // };
 
+// TODO: Change value names to includes PACKET_ prefix.
 enum PacketStatus {
   // """Defines status codes. User NAME.value to convert to int.
   // valid values are [0, 255]
@@ -45,8 +46,8 @@ enum PacketStatus {
 };
 
 typedef void (*SerialPacketsIncomingCommandHandler)(
-    byte command_endpoint, const PacketData& command_data,
-    byte& response_status, PacketData& response_data);
+    byte command_endpoint, const SerialPacketsData& command_data,
+    byte& response_status, SerialPacketsData& response_data);
 
 // enum OutcomeCode {
 //   OUTCOME_RESPONSE,
@@ -56,10 +57,11 @@ typedef void (*SerialPacketsIncomingCommandHandler)(
 // };
 
 typedef void (*SerialPacketsCommandResponseHandler)(
-    uint32_t cmd_id, byte response_status, const PacketData& response_data);
+    uint32_t cmd_id, byte response_status,
+    const SerialPacketsData& response_data);
 
 typedef void (*SerialPacketsIncomingMessageHandler)(
-    byte message_endpoint, const PacketData& message_data);
+    byte message_endpoint, const SerialPacketsData& message_data);
 
 // typedef void (*SerialPacketsEventHandler)(SeriaPacketsEvent event);
 
@@ -67,8 +69,8 @@ class SerialPacketsClient {
  public:
   SerialPacketsClient(
       SerialPacketsIncomingCommandHandler command_handler = nullptr,
-      SerialPacketsIncomingMessageHandler message_handler = nullptr )
-      : _logger(PacketLogger::VERBOSE),
+      SerialPacketsIncomingMessageHandler message_handler = nullptr)
+      : _logger(SerialPacketsLogger::VERBOSE),
         _command_handler(command_handler),
         _message_handler(message_handler),
         // _event_handler(event_handler),
@@ -82,16 +84,27 @@ class SerialPacketsClient {
 
   void loop();
 
-  bool sendCommand(byte endpoint, const PacketData& data,
+  bool sendCommand(byte endpoint, const SerialPacketsData& data,
 
                    SerialPacketsCommandResponseHandler response_handler,
                    uint32_t& cmd_id, uint16_t timeout);
 
-  bool sendMessage(byte endpoint, const PacketData& data);
+  bool sendMessage(byte endpoint, const SerialPacketsData& data);
+
+  int num_pending_commands() {
+    int count = 0;
+    for (int i = 0; i < MAX_PENDING_COMMANDS; i++) {
+      if (_command_contexts[i].cmd_id) {
+        count++;
+      }
+    }
+    return count;
+  }
 
  private:
   // For testing.
   friend class SerialPacketsClientInspector;
+  bool _ignore_rx_for_testing = false;
 
   struct CommandContext {
     CommandContext() { clear(); }
@@ -110,7 +123,7 @@ class SerialPacketsClient {
 
   // static  Logger null_logger;
 
-  PacketLogger _logger;
+  SerialPacketsLogger _logger;
 
   // Callback handlers. Set by the constructor.
   SerialPacketsIncomingCommandHandler const _command_handler;
@@ -119,18 +132,18 @@ class SerialPacketsClient {
 
   Stream* _data_stream = nullptr;
 
-  PacketData _tmp_data1;
-  PacketData _tmp_data2;
+  SerialPacketsData _tmp_data1;
+  SerialPacketsData _tmp_data2;
 
-  PacketEncoder _packet_encoder;
-  PacketDecoder _packet_decoder;
+  SerialPacketsEncoder _packet_encoder;
+  SerialPacketsDecoder _packet_decoder;
 
   // Used to assign command ids. Wraparound is ok. Skipping zero value.
   uint32_t _cmd_id_counter = 0;
   // Used to insert pre flag when packates are sparse.
-  PacketTimer _pre_flag_timer;
+  SerialPacketsTimer _pre_flag_timer;
   // Used to periodically clean up timeout pending commands.
-  PacketTimer _cleanup_timer;
+  SerialPacketsTimer _cleanup_timer;
 
   // The max number of in-progress outcoing commands.
   // static constexpr uint16_t MAX_CMD_CONTEXTS = 20;
@@ -153,14 +166,14 @@ class SerialPacketsClient {
   // Once the decoder reports a new decoded packet, this is called
   // to process it.
   void process_decoded_response_packet(const DecodedResponseMetadata& metadata,
-                                       const PacketData& data);
+                                       const SerialPacketsData& data);
   void process_decoded_command_packet(const DecodedCommandMetadata& metadata,
-                                      const PacketData& data);
+                                      const SerialPacketsData& data);
   void process_decoded_message_packet(const DecodedMessageMetadata& metadata,
-                                      const PacketData& data);
+                                      const SerialPacketsData& data);
 
   void force_next_pre_flag() {
-    _pre_flag_timer.set(PRE_FLAG_TIMEOUT_MILLIS + 1);
+    _pre_flag_timer.set(serial_packets_consts::PRE_FLAG_TIMEOUT_MILLIS + 1);
   }
   void loop_rx();
   void loop_cleanup();
@@ -177,8 +190,8 @@ class SerialPacketsClient {
 
   bool check_pre_flag() {
     _data_stream->flush();
-    const bool result =
-        _pre_flag_timer.elapsed_millis() > PRE_FLAG_TIMEOUT_MILLIS;
+    const bool result = _pre_flag_timer.elapsed_millis() >
+                        serial_packets_consts::PRE_FLAG_TIMEOUT_MILLIS;
     _pre_flag_timer.reset();
     return result;
   }

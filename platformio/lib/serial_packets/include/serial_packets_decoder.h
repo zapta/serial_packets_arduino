@@ -2,15 +2,19 @@
 
 #include <Arduino.h>
 
-#include "packet_consts.h"
-#include "packet_data.h"
-#include "packet_logger.h"
+#include "serial_packets_consts.h"
+#include "serial_packets_data.h"
+#include "serial_packets_logger.h"
 
+// namespace serial_packets {
 // enum DecodedPacketType {
 //   COMMAND,
 //   RESPONSE,
 //   MESSAGE,
 // };
+
+using serial_packets_consts::PacketType;
+using serial_packets_consts::MAX_PACKET_LEN;
 
 struct DecodedCommandMetadata {
   uint32_t cmd_id;
@@ -35,7 +39,7 @@ struct DecodedPacketMetadata {
   };
 };
 
-class PacketDecoder {
+class SerialPacketsDecoder {
  public:
   // enum DecoderStatus {
   //   // In normal operation.
@@ -55,7 +59,7 @@ class PacketDecoder {
   //   INVALID_PACKET_TYPE,
   // };
 
-  PacketDecoder(PacketLogger& logger)
+  SerialPacketsDecoder(SerialPacketsLogger& logger)
       : _logger(logger), _decoded_data(MAX_PACKET_DATA_LEN) {}
 
   // True if a packet is available.
@@ -63,7 +67,7 @@ class PacketDecoder {
 
   const DecodedPacketMetadata& packet_metadata() { return _decoded_metadata; }
 
-  const PacketData& packet_data() { return _decoded_data; }
+  const SerialPacketsData& packet_data() { return _decoded_data; }
 
   // For debugging. Return the current number of accomulated bytes.
   uint16_t len() { return _packet_len; }
@@ -73,7 +77,7 @@ class PacketDecoder {
   friend class PacketDecoderInspector;
 
   // None null.
-  PacketLogger& _logger;
+  SerialPacketsLogger& _logger;
 
   uint8_t _packet_buffer[MAX_PACKET_LEN];
   uint16_t _packet_len = 0;
@@ -92,7 +96,7 @@ class PacketDecoder {
 
   // Valid after returning the status PACKET_AVAILABLE.
   DecodedPacketMetadata _decoded_metadata;
-  PacketData _decoded_data;
+  SerialPacketsData _decoded_data;
 
   // Returns true iff a new packet is available.
   bool process_packet();
@@ -109,3 +113,5 @@ class PacketDecoder {
            (((uint32_t)_packet_buffer[i + 3]) << 0);
   }
 };
+
+// } // namepspace serial_packets

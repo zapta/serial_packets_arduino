@@ -1,10 +1,11 @@
-#include "serial_packets.h"
+#include "serial_packets_client.h"
 
-// #include "io.h"
-#include "packet_consts.h"
+// TODO: All methods should verify that begin() was called and that the
+// client is active.
 
-// TODO: All methods should verify that data stream is available (and that
-// client is in active state)
+using serial_packets_consts::TYPE_COMMAND;
+using serial_packets_consts::TYPE_MESSAGE;
+using serial_packets_consts::TYPE_RESPONSE;
 
 void SerialPacketsClient::begin(Stream& data_stream, Stream& log_stream) {
   if (_data_stream) {
@@ -37,7 +38,7 @@ void SerialPacketsClient::loop() {
 // Process cleanup of timeout commands.
 void SerialPacketsClient::loop_cleanup() {
   // A shared, read only empty data.
-  static const PacketData empty_data(0);
+  static const SerialPacketsData empty_data(0);
 
   // Perform a cleanup cycle once every 5 ms.
   if (_cleanup_timer.elapsed_millis() < 2) {
@@ -88,11 +89,18 @@ void SerialPacketsClient::loop_rx() {
         _data_stream->readBytes(rx_transfer_buffer, count);
     n -= bytes_read;
     // TODO: Assert that bytes_read == count, or at least > 0.
+
+    // A special hook for testing. This allows to simulate command
+    // timeout.
+    if (_ignore_rx_for_testing) {
+      return;
+    }
+
     for (int i = 0; i < bytes_read; i++) {
       const uint8_t b = rx_transfer_buffer[i];
       // _logger.verbose("%02x", b);
       const bool has_new_packet = _packet_decoder.decode_next_byte(b);
-      // if (status != PacketDecoder::IN_PACKET) {
+      // if (status != SerialPacketsDecoder::IN_PACKET) {
       // _logger.log("%02x -> %d %hu", rx_transfer_buffer[i], status,
       // _packet_decoder.len());
       // }
@@ -125,7 +133,7 @@ void SerialPacketsClient::loop_rx() {
 
 // Process an incoming command packet.
 void SerialPacketsClient::process_decoded_command_packet(
-    const DecodedCommandMetadata& metadata, const PacketData& data) {
+    const DecodedCommandMetadata& metadata, const SerialPacketsData& data) {
   if (!_command_handler) {
     _logger.error("No handler for incoming command");
     return;
@@ -169,7 +177,7 @@ void SerialPacketsClient::process_decoded_command_packet(
 
 // Process an incoming response packet.
 void SerialPacketsClient::process_decoded_response_packet(
-    const DecodedResponseMetadata& metadata, const PacketData& data) {
+    const DecodedResponseMetadata& metadata, const SerialPacketsData& data) {
   if (!metadata.cmd_id) {
     _logger.error("Incoming response packet has cmd_id = 0.");
     return;
@@ -193,32 +201,19 @@ void SerialPacketsClient::process_decoded_response_packet(
 
 // Process an incoming message packet.
 void SerialPacketsClient::process_decoded_message_packet(
-    const DecodedMessageMetadata& metadata, const PacketData& data) {
-  // if (!metadata.cmd_id) {
-  //   _logger.log("ERROR: incoming response packet has cmd_id = 0.");
-  //   return;
-  // }
-  // CommandContext* context = find_context_with_cmd_id(metadata.cmd_id);
-  // if (!context) {
-  //   _logger.log(
-  //       "ERROR: incoming response packet has no pending command. May
-  //       timeout.");
-  //   return;
-  // }
+    const DecodedMessageMetadata& metadata, const SerialPacketsData& data) {
+
   if (!_message_handler) {
     _logger.error("No message handler to dispatch an incoming message.");
     return;
   }
 
   _message_handler(metadata.endpoint, data);
-  // context->response_handler(metadata.cmd_id, metadata.status, data);
-  // // Setting the cmd_id to zero frees the context.
-  // context->clear();
-  // return;
+
 }
 
 bool SerialPacketsClient::sendCommand(
-    byte endpoint, const PacketData& data,
+    byte endpoint, const SerialPacketsData& data,
     SerialPacketsCommandResponseHandler response_handler, uint32_t& cmd_id,
     uint16_t timeout_millis = DEFAULT_CMD_TIMEOUT_MILLIS) {
   // Prepare for failure.
@@ -302,29 +297,9 @@ bool SerialPacketsClient::sendCommand(
   return true;
 }
 
-bool SerialPacketsClient::sendMessage(byte endpoint, const PacketData& data) {
-  // Prepare for failure.
-  // cmd_id = 0;
-
-  // if (!response_handler) {
-  //   return false;
-  // }
-
-  // Verify timeout.
-  // if (timeout_millis < MIN_CMD_TIMEOUT_MILLIS ||
-  //     timeout_millis > MAX_CMD_TIMEOUT_MILLIS) {
-  //   return false;
-  // }
-
-  // Find a free command context. At this point we still leave it
-  // with cmd_id = 0. in case of an early return due to an error.
-  // CommandContext* cmd_context = find_context_with_cmd_id(0);
-  // if (!cmd_context) {
-  //   // Too many in progress outgoing commands.
-  //   return false;
-  // }
-
-  // const uint32_t new_cmd_id = assign_cmd_id();
+bool SerialPacketsClient::sendMessage(byte endpoint,
+                                      const SerialPacketsData& data) {
+  
 
   // Determine if to insert a packet flag.
   const bool insert_pre_flag = check_pre_flag();
@@ -352,11 +327,7 @@ bool SerialPacketsClient::sendMessage(byte endpoint, const PacketData& data) {
     force_next_pre_flag();
   }
 
-  // Set up the cmd context. Setting a non zero cmd_id allocates it.
-  // cmd_context->cmd_id = new_cmd_id;
-  // Wrap around is ok.
-  // cmd_context->expiration_time_millis = millis() + timeout_millis;
-  // cmd_context->response_handler = response_handler;
+ 
 
   // cmd_id = new_cmd_id;
   return true;

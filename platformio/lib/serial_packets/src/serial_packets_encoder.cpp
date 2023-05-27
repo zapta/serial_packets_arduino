@@ -1,11 +1,20 @@
-#include "packet_encoder.h"
+#include "serial_packets_encoder.h"
 
 // #include "io.h"
-#include "packet_consts.h"
-#include "serial_packets.h"
+#include "serial_packets_consts.h"
+// #include "serial_packets.h"
 
-bool PacketEncoder::byte_stuffing(const PacketData& in,
-                                  bool insert_pre_flag, PacketData* out) {
+using serial_packets_consts::PACKET_FLAG;
+// using serial_packets_consts::MIN_PACKET_LEN;
+// using serial_packets_consts::MAX_PACKET_LEN;
+using serial_packets_consts::PACKET_ESC;
+using serial_packets_consts::TYPE_COMMAND;
+using serial_packets_consts::TYPE_RESPONSE;
+using serial_packets_consts::TYPE_MESSAGE;
+// namespace serial_packets {
+
+bool SerialPacketsEncoder::byte_stuffing(const SerialPacketsData& in,
+                                  bool insert_pre_flag, SerialPacketsData* out) {
   out->clear();
   const uint16_t capacity = out->capacity();
   uint16_t j = 0;
@@ -23,7 +32,7 @@ bool PacketEncoder::byte_stuffing(const PacketData& in,
   // Byte stuff the in bytes.
   for (uint16_t i = 0; i < in._size; i++) {
     const uint8_t b = in._buffer[i];
-    if (b == PACKET_FLAG || b == PACKET_ESC) {
+    if (b == PACKET_FLAG || b ==  PACKET_ESC) {
       if (j + 2 >= capacity) {
         _logger.error(
             "Insufficient space when trying to byte stuff a packet "
@@ -55,10 +64,10 @@ bool PacketEncoder::byte_stuffing(const PacketData& in,
   return true;
 }
 
-bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
-                                          const PacketData& data,
+bool SerialPacketsEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
+                                          const SerialPacketsData& data,
                                           bool insert_pre_flag,
-                                          PacketData* out) {
+                                          SerialPacketsData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.write_uint8(TYPE_COMMAND);
@@ -76,10 +85,10 @@ bool PacketEncoder::encode_command_packet(uint32_t cmd_id, uint8_t endpoint,
   return byte_stuffing(_tmp_data, insert_pre_flag, out);
 }
 
-bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
-                                           const PacketData& data,
+bool SerialPacketsEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
+                                           const SerialPacketsData& data,
                                            bool insert_pre_flag,
-                                           PacketData* out) {
+                                           SerialPacketsData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.write_uint8(TYPE_RESPONSE);
@@ -97,10 +106,10 @@ bool PacketEncoder::encode_response_packet(uint32_t cmd_id, uint8_t status,
   return byte_stuffing(_tmp_data, insert_pre_flag, out);
 }
 
-bool PacketEncoder::encode_message_packet(uint8_t endpoint,
-                                          const PacketData& data,
+bool SerialPacketsEncoder::encode_message_packet(uint8_t endpoint,
+                                          const SerialPacketsData& data,
                                           bool insert_pre_flag,
-                                          PacketData* out) {
+                                          SerialPacketsData* out) {
   // Encode packet in _tmp_data.
   _tmp_data.clear();
   _tmp_data.write_uint8(TYPE_MESSAGE);
@@ -116,3 +125,5 @@ bool PacketEncoder::encode_message_packet(uint8_t endpoint,
   // Byte stuffed into the outupt data.
   return byte_stuffing(_tmp_data, insert_pre_flag, out);
 }
+
+// }  // namespace serial_packets

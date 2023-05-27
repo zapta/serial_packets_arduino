@@ -4,20 +4,6 @@
 
 #include <Arduino.h>
 
-// #include "serial_packets.h"
-
-// Flag and escape bytes per HDLC specification.
-constexpr uint8_t PACKET_FLAG = 0x7E;
-constexpr uint8_t PACKET_ESC = 0X7D;
-
-// Prefix a packet with a flag byte only if interval from previous
-// encoded packet is longer that this time in milliseconds.
-constexpr uint16_t PRE_FLAG_TIMEOUT_MILLIS = 1000;
-
-// Packet sizes in bytes, with zero data length, and before
-// byte stuffing, and flagging.
-constexpr uint16_t MIN_PACKET_OVERHEAD = 4;
-constexpr uint16_t MAX_PACKET_OVERHEAD = 8;
 
 // Max size of a packet data. User can override. Impacts memory 
 // usage.
@@ -36,6 +22,27 @@ static constexpr uint16_t MAX_PENDING_COMMANDS = 20;
 static constexpr uint16_t MAX_PENDING_COMMANDS = (CONFIG_MAX_PENDING_COMMANDS);
 #endif
 
+namespace serial_packets_consts {
+
+// #include "serial_packets.h"
+
+// Flag and escape bytes per HDLC specification.
+constexpr uint8_t PACKET_FLAG = 0x7E;
+constexpr uint8_t PACKET_ESC = 0X7D;
+
+// Prefix a packet with a flag byte only if interval from previous
+// encoded packet is longer that this time in milliseconds.
+constexpr uint16_t PRE_FLAG_TIMEOUT_MILLIS = 1000;
+
+// Packet sizes in bytes, with zero data length, and before
+// byte stuffing, and flagging.
+constexpr uint16_t MIN_PACKET_OVERHEAD = 4;
+constexpr uint16_t MAX_PACKET_OVERHEAD = 8;
+
+
+
+
+
 
 // Sizes before flagging and byte stuffing.
 constexpr uint16_t MIN_PACKET_LEN = MIN_PACKET_OVERHEAD;
@@ -49,3 +56,5 @@ enum PacketType {
   TYPE_RESPONSE = 2,
   TYPE_MESSAGE = 3,
 };
+
+} // namespace serial_packets_consts

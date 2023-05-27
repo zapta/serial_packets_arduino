@@ -1,13 +1,12 @@
 #include <Arduino.h>
-#include <serial_packets.h>
-
+#include "serial_packets_client.h"
 #include "io.h"
-#include "packet_timer.h"
+#include "serial_packets_timer.h"
 
 // Callback handler for incomming commands.
 // Called within the call to packets.loop(). Should return immediatly.
-void command_handler(byte endpoint, const PacketData& data,
-                            byte& response_status, PacketData& response_data) {
+void command_handler(byte endpoint, const SerialPacketsData& data,
+                            byte& response_status, SerialPacketsData& response_data) {
   response_status = OK;
   response_data.write_uint32(0x12345678);
   Serial.println("Command Handler");
@@ -15,7 +14,7 @@ void command_handler(byte endpoint, const PacketData& data,
 
 // Callback handler for incomming messages.
 // Called within the call to packets.loop().  Should return immediatly.
-void message_handler(byte endpoint, const PacketData& data) {
+void message_handler(byte endpoint, const SerialPacketsData& data) {
   Serial.printf("Message Handler, endpoint = %02x\n", endpoint);
   data.dump("Message data", Serial);
   const uint8_t v1 = data.read_uint8();
@@ -50,14 +49,14 @@ void setup() {
   packets.begin(Serial2, Serial);
 }
 
-static PacketTimer test_command_timer;
-static PacketData test_packet_data(40);
+static SerialPacketsTimer test_command_timer;
+static SerialPacketsData test_packet_data(40);
 static uint32_t test_cmd_id = 0;
 
 // Callback handler for incomming test command response.
 // Called within the call to packets.loop(). Should return immediatly.
 void response_handler(uint32_t cmd_id, byte response_status,
-                                   const PacketData& response_data) {
+                                   const SerialPacketsData& response_data) {
   Serial.printf("Command outcome id=%08x, status=%hd\n", cmd_id,
                 response_status);
 }

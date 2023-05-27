@@ -1,4 +1,4 @@
-// #include "packet_crc.h"
+// #include "serial_packets_crc.h"
 
 #include <Arduino.h>
 
@@ -12,7 +12,7 @@
 // Online calculator: https://www.vcalc.com/wiki/crc-16-ccitt
 // 010000000714c8000004d2
 
-namespace packet_crc {
+// namespace serial_packets {
 
 static const uint16_t CRC_CCITT_TABLE[256] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7, 0x8108,
@@ -45,7 +45,7 @@ static const uint16_t CRC_CCITT_TABLE[256] = {
     0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8, 0x6E17, 0x7E36, 0x4E55, 0x5E74,
     0x2E93, 0x3EB2, 0x0ED1, 0x1EF0};
 
-uint16_t gen_crc16(const uint8_t* buffer, int size) {
+uint16_t serial_packets_gen_crc16(const uint8_t* buffer, int size) {
   // io::TEST1.on();
 
   uint16_t tmp;
@@ -61,4 +61,4 @@ uint16_t gen_crc16(const uint8_t* buffer, int size) {
   return crc;
 }
 
-}  // namespace packet_crc
+// }  // namespace serial_packets

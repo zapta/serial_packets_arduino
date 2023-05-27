@@ -6,7 +6,7 @@
 // For STM32 'black pill'.
 #define BUILTIN_LED PC13
 
-void populate_data(PacketData& data, const std::vector<uint8_t> bytes) {
+void populate_data(SerialPacketsData& data, const std::vector<uint8_t> bytes) {
   data.clear();
   TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.capacity());
   for (int i = 0; i < bytes.size(); i++) {
@@ -16,7 +16,7 @@ void populate_data(PacketData& data, const std::vector<uint8_t> bytes) {
   TEST_ASSERT_GREATER_OR_EQUAL(bytes.size(), data.size());
 }
 
-std::vector<uint8_t> copy_data(const PacketData& data) {
+std::vector<uint8_t> copy_data(const SerialPacketsData& data) {
   std::vector<uint8_t> result;
   data.reset_reading();
   while (data.bytes_left_to_read()) {
@@ -29,7 +29,7 @@ std::vector<uint8_t> copy_data(const PacketData& data) {
 }
 
 // Side affect of reseting the reading.
-void assert_data_equals(const PacketData& data,
+void assert_data_equals(const SerialPacketsData& data,
                         const std::vector<uint8_t> expected) {
   const std::vector<uint8_t> data_vect = copy_data(data);
   assert_vectors_equal(expected, data_vect);
@@ -78,7 +78,7 @@ void common_loop_body() {
 }
 
 // // Side affect of reseting the reading.
-// void populate_data(PacketData& data, const std::vector<uint8_t> bytes) {
+// void populate_data(SerialPacketsData& data, const std::vector<uint8_t> bytes) {
 //   data.clear();
 //   for (int i = 0; i < bytes.size(); i++) {
 //     data.write_uint8(bytes.at(i));

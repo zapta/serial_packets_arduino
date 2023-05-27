@@ -4,25 +4,25 @@
 #pragma once
 
 #include <Arduino.h>
-// #include "packet_encoder.h"
+// #include "serial_packets_encoder.h"
 
 // enum SeriaPacketsEvent {
 //   CONNECTED = 1,
 //   DISCONNECTED = 2,
 // };
 
-class PacketData {
+class SerialPacketsData {
  public:
    // Truncates capacity to MAX_PACKET_DATA_LEN.  
    // If can't allocate, capacity is set to zero.
-  PacketData(uint16_t capacity) { 
+  SerialPacketsData(uint16_t capacity) { 
     alloc_buffer(capacity); 
   }
-  ~PacketData() { release_buffer(); }
+  ~SerialPacketsData() { release_buffer(); }
 
   // Disable copying and assignment.
-  PacketData(const PacketData& other) = delete;
-  PacketData& operator=(const PacketData& other) = delete;
+  SerialPacketsData(const SerialPacketsData& other) = delete;
+  SerialPacketsData& operator=(const SerialPacketsData& other) = delete;
 
   inline uint16_t capacity() const { return _capacity; }
   inline uint16_t size() const { return _size; }
@@ -101,7 +101,7 @@ class PacketData {
     // return true;
   }
 
-  void write_data(const PacketData& source) {
+  void write_data(const SerialPacketsData& source) {
     if (_write_errors || source._size > free_bytes()) {
       _write_errors = true;
       return ;
@@ -159,7 +159,7 @@ class PacketData {
   }
 
   // Append read bytes to destination data.
-  void read_data(PacketData& destination, uint32_t bytes_to_read) const {
+  void read_data(SerialPacketsData& destination, uint32_t bytes_to_read) const {
     if (_read_errors || bytes_to_read > unread_bytes() ||
         bytes_to_read > destination.free_bytes()) {
       // Note that we don't set the write error of the destination data.
@@ -201,6 +201,6 @@ class PacketData {
   // Truncates capacity to MAX_PACKET_DATA_LEN.
   void alloc_buffer(uint16_t buffer_size);
 
-  friend class PacketEncoder;
+  friend class SerialPacketsEncoder;
   friend class SerialPacketsClient;
 };
