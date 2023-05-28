@@ -3,8 +3,6 @@
 
 #include <unity.h>
 
-// For STM32 'black pill'.
-#define BUILTIN_LED PC13
 
 void assert_vectors_equal(const std::vector<uint8_t> expected,
                           const std::vector<uint8_t> actual) {
@@ -25,15 +23,15 @@ void loop_client(SerialPacketsClient& client, uint32_t time_millis) {
 }
 
 void common_setup_init() {
-  pinMode(BUILTIN_LED, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // Time for the USB/CDC serial to stabalize.
   delay(2000);
 }
 
 void common_loop_body() {
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(500);
-  digitalWrite(BUILTIN_LED, LOW);
-  delay(500);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(600);
 }

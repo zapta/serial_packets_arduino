@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "Serial_Packets.h"
+#include "io.h"
 
 // A callback for all incoming commands. Configured once during initialization.
 void command_handler(byte endpoint, const SerialPacketsData& data,
@@ -38,6 +39,8 @@ void response_handler(uint32_t cmd_id, byte response_status,
 static SerialPacketsClient packets(command_handler, message_handler);
 
 void setup() {
+  io::setup();
+  
   // A serial port for packet data communication.
   Serial2.begin(115200);
 
@@ -64,6 +67,7 @@ void loop() {
   // Periodically send a test command and a message.
   if (millis() - last_send_time_millis > 1000) {
     last_send_time_millis = millis();
+    io::LED.toggle();
 
     // Send a command
     test_packet_data.clear();
